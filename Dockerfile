@@ -1,6 +1,8 @@
 # --- Build Frontend ---
 FROM node:20-alpine AS frontend-builder
 WORKDIR /web
+# 开启 npm 国内镜像加速
+RUN npm config set registry https://registry.npmmirror.com
 ARG VITE_HCAPTCHA_SITE_KEY
 ENV VITE_HCAPTCHA_SITE_KEY=$VITE_HCAPTCHA_SITE_KEY
 COPY web/package*.json ./
@@ -11,6 +13,8 @@ RUN npm run build
 # --- Build Backend ---
 FROM golang:1.22-alpine AS backend-builder
 WORKDIR /server
+# 开启 Go 国内镜像加速 (使用阿里云镜像更稳定)
+ENV GOPROXY=https://mirrors.aliyun.com/goproxy/,direct
 COPY server/go.mod server/go.sum ./
 RUN go mod download
 COPY server/ .
@@ -18,7 +22,9 @@ RUN go build -o miubox main.go
 
 # --- Final Image ---
 FROM alpine:latest
-RUN apk add --no-cache ca-certificates tzdata
+# 替换为腾讯云 Alpine 镜像源
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories && \
+    apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 
