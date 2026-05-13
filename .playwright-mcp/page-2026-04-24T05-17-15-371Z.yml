@@ -1,0 +1,226 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "CP Campus Pulse CDK 空投站" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]: CP
+        - generic [ref=e8]:
+          - strong [ref=e9]: Campus Pulse
+          - generic [ref=e10]: CDK 空投站
+      - generic [ref=e11]:
+        - generic [ref=e12]: 社区附属功能站
+        - generic [ref=e13]: 激活码限量发放 / 定时开始 / CSV 导出
+      - navigation [ref=e14]:
+        - link "领取页" [ref=e15] [cursor=pointer]:
+          - /url: /
+        - link "管理台" [ref=e16] [cursor=pointer]:
+          - /url: /admin
+  - main [ref=e17]:
+    - generic [ref=e19]:
+      - paragraph [ref=e20]: 管理员控制台
+      - heading "活动配置与发码管理" [level=1] [ref=e21]
+      - paragraph [ref=e22]: 维持主站后台那种轻边框、强信息密度的编排方式，把配置、导入、生成和记录整合进少量大面板。
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e26]:
+          - paragraph [ref=e27]: 实时统计
+          - heading "发放监控" [level=2] [ref=e28]
+          - paragraph [ref=e29]: 正在同步...
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: 已导入总量
+            - strong [ref=e33]: "--"
+          - generic [ref=e34]:
+            - generic [ref=e35]: 已领取数量
+            - strong [ref=e36]: "--"
+          - generic [ref=e37]:
+            - generic [ref=e38]: 剩余数量
+            - strong [ref=e39]: "--"
+          - generic [ref=e40]:
+            - generic [ref=e41]: 发放上限
+            - strong [ref=e42]: "--"
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - paragraph [ref=e47]: 活动配置
+              - heading "基础信息与时间窗口" [level=3] [ref=e48]
+            - button "新建活动批次" [ref=e49] [cursor=pointer]
+            - button "保存活动" [ref=e50] [cursor=pointer]
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - generic [ref=e53]: "01"
+              - strong [ref=e54]: 项目基础信息
+              - paragraph [ref=e55]: 不同活动建议使用不同批次 ID，后续导入和生成的 CDK 会绑定到当前批次。
+            - generic [ref=e56]:
+              - generic [ref=e57]: 活动批次 ID
+              - textbox "活动批次 ID" [disabled] [ref=e58]: 保存后自动生成
+            - generic [ref=e59]:
+              - generic [ref=e60]: 项目标签
+              - textbox "项目标签" [ref=e61]:
+                - /placeholder: 例如：新手福利, 限时活动, 会员专属
+            - generic [ref=e62]:
+              - generic [ref=e63]: "02"
+              - strong [ref=e64]: CDK 与库存策略
+              - paragraph [ref=e65]: 批量独立码会为每个 CDK 自动生成一个专属领取链接。
+            - generic [ref=e66]:
+              - generic [ref=e67]: CDK 类型 *
+              - combobox "CDK 类型 *" [ref=e68]:
+                - option "一次性激活码"
+                - option "通用兑换码"
+                - option "批量独立码" [selected]
+            - generic [ref=e69]:
+              - generic [ref=e70]: 子站名称
+              - textbox "子站名称" [ref=e71]:
+                - /placeholder: CDK 空投站
+                - text: CDK 空投站
+            - generic [ref=e72]:
+              - generic [ref=e73]: 活动名称
+              - textbox "活动名称" [ref=e74]:
+                - /placeholder: 《星际边境》新春礼包
+            - generic [ref=e75]:
+              - generic [ref=e76]: 开始时间
+              - textbox "开始时间" [ref=e77]
+            - generic [ref=e78]:
+              - generic [ref=e79]: 结束时间
+              - textbox "结束时间" [ref=e80]
+            - generic [ref=e81]:
+              - generic [ref=e82]: 总库存限制 *
+              - spinbutton "总库存限制 *" [ref=e83]: "100"
+            - generic [ref=e84]:
+              - generic [ref=e85]: 单用户领取次数
+              - spinbutton "单用户领取次数" [ref=e86]: "1"
+            - generic [ref=e87]:
+              - generic [ref=e88]: 每日领取总量
+              - spinbutton "每日领取总量" [ref=e89]: "0"
+            - generic [ref=e90]:
+              - generic [ref=e91]: "03"
+              - strong [ref=e92]: 领取条件与风控
+              - paragraph [ref=e93]: 等级、分数、积分为社区侧校验字段；当前独立站先保存规则，后续可接主站用户系统。
+            - generic [ref=e94]:
+              - generic [ref=e95]: 最低社区等级
+              - spinbutton "最低社区等级" [ref=e96]: "0"
+            - generic [ref=e97]:
+              - generic [ref=e98]: 最低社区分数
+              - spinbutton "最低社区分数" [ref=e99]: "0"
+            - generic [ref=e100]:
+              - generic [ref=e101]: 领取消耗积分
+              - spinbutton "领取消耗积分" [ref=e102]: "0"
+            - generic [ref=e103]:
+              - generic [ref=e104]:
+                - generic [ref=e105]: 每 IP 限领 1 次
+                - checkbox "每 IP 限领 1 次" [ref=e106]
+              - generic [ref=e107]:
+                - generic [ref=e108]: 每账号限领 1 次
+                - checkbox "每账号限领 1 次" [ref=e109]
+              - generic [ref=e110]:
+                - generic [ref=e111]: 限制相同设备
+                - checkbox "限制相同设备" [ref=e112]
+              - generic [ref=e113]:
+                - generic [ref=e114]: 需要登录
+                - checkbox "需要登录" [ref=e115]
+              - generic [ref=e116]:
+                - generic [ref=e117]: 领取后绑定账号
+                - checkbox "领取后绑定账号" [ref=e118]
+              - generic [ref=e119]:
+                - generic [ref=e120]: 允许过期后补领
+                - checkbox "允许过期后补领" [ref=e121]
+              - generic [ref=e122]:
+                - generic [ref=e123]: 启用黑名单限制
+                - checkbox "启用黑名单限制" [ref=e124]
+              - generic [ref=e125]:
+                - generic [ref=e126]: 启用白名单领取
+                - checkbox "启用白名单领取" [ref=e127]
+              - generic [ref=e128]:
+                - generic [ref=e129]: 需要验证码/风控校验
+                - checkbox "需要验证码/风控校验" [ref=e130]
+            - generic [ref=e131]:
+              - generic [ref=e132]: "04"
+              - strong [ref=e133]: 分发内容与提示文案
+              - paragraph [ref=e134]: 用于配置用户领取后获得的内容，以及成功/失败状态展示。
+            - generic [ref=e135]:
+              - generic [ref=e136]: 奖励类型
+              - combobox "奖励类型" [ref=e137]:
+                - option "文本内容" [selected]
+                - option "积分"
+                - option "会员天数"
+                - option "权益包"
+                - option "API Key"
+                - option "兑换链接"
+                - option "组合奖励"
+            - generic [ref=e138]:
+              - generic [ref=e139]: 成功提示文案
+              - textbox "成功提示文案" [ref=e140]: 领取成功，请尽快复制并完成兑换。
+            - generic [ref=e141]:
+              - generic [ref=e142]: 发放内容配置
+              - textbox "发放内容配置" [ref=e143]:
+                - /placeholder: 例如：积分 100、会员 7 天、权益包 ID、API Key 说明、兑换链接或自定义 JSON
+                - text: CDK 激活码
+            - generic [ref=e144]:
+              - generic [ref=e145]: 失败提示文案
+              - textbox "失败提示文案" [ref=e146]:
+                - /placeholder: 例如：当前不满足领取条件，请检查等级、积分或活动时间。
+                - text: 当前不满足领取条件，请检查活动规则。
+            - generic [ref=e147]:
+              - generic [ref=e148]: 活动说明（Markdown）
+              - textbox "活动说明（Markdown）" [ref=e149]:
+                - /placeholder: 支持标题、列表、强调和链接
+        - generic [ref=e150]:
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - generic [ref=e153]:
+                - paragraph [ref=e154]: 批量导入
+                - heading "CDK 池维护" [level=3] [ref=e155]
+              - generic [ref=e156] [cursor=pointer]: 读取文件
+            - textbox "每行一个激活码，也支持直接粘贴 CSV 文本。" [ref=e157]
+            - generic [ref=e158]:
+              - generic [ref=e159]: 当前池大小 0，待导入 0 条
+              - button "确认导入" [disabled] [ref=e160]
+          - generic [ref=e161]:
+            - generic [ref=e162]:
+              - generic [ref=e163]:
+                - paragraph [ref=e164]: 自动生成
+                - heading "批量生成规则" [level=3] [ref=e165]
+              - button "立即生成" [ref=e166] [cursor=pointer]
+            - generic [ref=e167]:
+              - generic [ref=e168]:
+                - generic [ref=e169]: 前缀
+                - textbox "前缀" [ref=e170]: CP
+              - generic [ref=e171]:
+                - generic [ref=e172]: 数量
+                - textbox "数量" [ref=e173]: "24"
+              - generic [ref=e174]:
+                - generic [ref=e175]: 分段
+                - textbox "分段" [ref=e176]: "3"
+              - generic [ref=e177]:
+                - generic [ref=e178]: 每段长度
+                - textbox "每段长度" [ref=e179]: "4"
+          - generic [ref=e180]:
+            - generic [ref=e181]:
+              - generic [ref=e182]:
+                - paragraph [ref=e183]: 导出与状态
+                - heading "领取结果" [level=3] [ref=e184]
+              - button "导出 CSV" [ref=e185] [cursor=pointer]
+              - button "导出链接" [ref=e186] [cursor=pointer]
+            - generic [ref=e187]:
+              - generic [ref=e188]:
+                - term [ref=e189]: 活动开始
+                - definition [ref=e190]: "--"
+              - generic [ref=e191]:
+                - term [ref=e192]: 活动结束
+                - definition [ref=e193]: "--"
+              - generic [ref=e194]:
+                - term [ref=e195]: 当前状态
+                - definition [ref=e196]: 同步中...
+      - generic [ref=e197]:
+        - generic [ref=e198]:
+          - generic [ref=e199]:
+            - paragraph [ref=e200]: 最近领取
+            - heading "最新领取记录" [level=3] [ref=e201]
+          - button "刷新" [ref=e202] [cursor=pointer]
+        - generic [ref=e203]:
+          - generic [ref=e204]:
+            - generic [ref=e205]: 激活码
+            - generic [ref=e206]: 账号 / UID
+            - generic [ref=e207]: 领取时间
+          - paragraph [ref=e208]: 还没有人领取，记录区为空。

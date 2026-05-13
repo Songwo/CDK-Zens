@@ -1,0 +1,19 @@
+[2m12:50:58[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/admin/CampaignListPage" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/2026毕业设计/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/src/App.jsx[39m:10:29
+[33m  24 |  import ProjectCreatePage from "./pages/admin/ProjectCreatePage";
+  25 |  import ProjectDetailPage from "./pages/admin/ProjectDetailPage";
+  26 |  import CampaignListPage from "./pages/admin/CampaignListPage";
+     |                                ^
+  27 |  import NodeListPage from "./pages/admin/NodeListPage";
+  28 |  import NodeDetailPage from "./pages/admin/NodeDetailPage";[39m
+      at TransformPluginContext._formatLog (file:///D:/2026%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/node_modules/vite/dist/node/chunks/config.js:29003:43)
+      at TransformPluginContext.error (file:///D:/2026%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/node_modules/vite/dist/node/chunks/config.js:29000:14)
+      at normalizeUrl (file:///D:/2026%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/node_modules/vite/dist/node/chunks/config.js:27123:18)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+      at async file:///D:/2026%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/node_modules/vite/dist/node/chunks/config.js:27181:32
+      at async Promise.all (index 12)
+      at async TransformPluginContext.transform (file:///D:/2026%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/node_modules/vite/dist/node/chunks/config.js:27149:4)
+      at async EnvironmentPluginContainer.transform (file:///D:/2026%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/node_modules/vite/dist/node/chunks/config.js:28801:14)
+      at async loadAndTransform (file:///D:/2026%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/node_modules/vite/dist/node/chunks/config.js:22670:26)
+      at async viteTransformMiddleware (file:///D:/2026%E6%AF%95%E4%B8%9A%E8%AE%BE%E8%AE%A1/DaiMa/campus-pulse(back)/campus-pulse/cdk-airdrop-station/web/node_modules/vite/dist/node/chunks/config.js:24546:20)

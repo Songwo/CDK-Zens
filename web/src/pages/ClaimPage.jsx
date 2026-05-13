@@ -1,0 +1,376 @@
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useParams } from "react-router-dom";
+import { claimApi, isLoggedIn, publicApi } from "../lib/api";
+import { getFingerprint } from "../lib/storage";
+import ParticleBurst from "../components/ParticleBurst";
+import HCaptchaBox from "../components/HCaptchaBox";
+
+const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$*&!";
+
+function formatTime(iso) {
+  if (!iso) return "--";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
+/* 内联 CDK 解密动画组件 */
+function InlineCDKReveal({ code, claimedAt }) {
+  const [chars, setChars] = useState([]);
+  const [done, setDone] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!code) return;
+    const len = code.length;
+    setChars(Array.from({ length: len }, () => ({ c: CHARS[Math.floor(Math.random() * CHARS.length)], ok: false })));
+    let idx = 0;
+    const t = setInterval(() => {
+      setChars(prev => {
+        const next = [...prev];
+        for (let i = idx; i < len; i++) {
+          next[i] = { c: /[\s/:.\-]/.test(code[i]) ? code[i] : CHARS[Math.floor(Math.random() * CHARS.length)], ok: false };
+        }
+        if (idx < len) next[idx] = { c: code[idx], ok: true };
+        return next;
+      });
+      idx++;
+      if (idx > len) { clearInterval(t); setDone(true); }
+    }, 40);
+    return () => clearInterval(t);
+  }, [code]);
+
+  async function copy() {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
+  return (
+    <div className="cdk-reveal">
+      <div className="cdk-reveal__header">
+        <span>兑换信息</span>
+        <button onClick={copy} disabled={!code}>{copied ? "✓ 已复制" : "复制内容"}</button>
+      </div>
+      <div className={`cdk-reveal__code ${done ? "cdk-reveal__code--done" : ""}`}>
+        {!code && <span className="cdk-reveal__waiting">&gt;&gt; 等待获取兑换链接 / 口令...</span>}
+        {code && chars.map((item, i) => (
+          <span key={i} className={item.ok ? "cdk-char--resolved" : "cdk-char--scramble"}>{item.c}</span>
+        ))}
+      </div>
+      {claimedAt && <p className="cdk-reveal__hint">锁定时间 {new Date(claimedAt).toLocaleString("zh-CN")}</p>}
+    </div>
+  );
+}
+
+/* 倒计时组件 */
+function Countdown({ targetTime, onComplete }) {
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    const end = new Date(targetTime).getTime();
+    const update = () => {
+      const now = Date.now();
+      const diff = end - now;
+      if (diff <= 0) {
+        setTimeLeft(0);
+        if (onComplete) onComplete();
+      } else {
+        setTimeLeft(diff);
+      }
+    };
+    update();
+    const t = setInterval(update, 1000);
+    return () => clearInterval(t);
+  }, [targetTime, onComplete]);
+
+  if (timeLeft <= 0) return <span style={{color: 'var(--cp-brand)', fontWeight: 800}}>通道已开启</span>;
+
+  const d = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+  const h = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+  const m = Math.floor((timeLeft / 1000 / 60) % 60);
+  const s = Math.floor((timeLeft / 1000) % 60);
+
+  const pad = (n) => String(n).padStart(2, '0');
+
+  return (
+    <div className="countdown-box">
+      <div className="countdown-item"><span className="val">{d}</span><span className="lbl">天</span></div>
+      <div className="countdown-sep">:</div>
+      <div className="countdown-item"><span className="val">{pad(h)}</span><span className="lbl">时</span></div>
+      <div className="countdown-sep">:</div>
+      <div className="countdown-item"><span className="val">{pad(m)}</span><span className="lbl">分</span></div>
+      <div className="countdown-sep">:</div>
+      <div className="countdown-item"><span className="val">{pad(s)}</span><span className="lbl">秒</span></div>
+    </div>
+  );
+}
+
+export default function ClaimPage() {
+  const { projectCode } = useParams();
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [claiming, setClaiming] = useState(false);
+  const [claimResult, setClaimResult] = useState(null);
+  const [burstTrigger, setBurstTrigger] = useState("");
+  const [hcaptchaToken, setHcaptchaToken] = useState("");
+  const [toast, setToast] = useState("");
+  const [brand, setBrand] = useState({ systemName: "缪盒空投台", brandEnglishName: "MiuBox Airdrop Hub", logoText: "MB" });
+  const hcaptchaRef = useRef(null);
+  const fingerprint = getFingerprint();
+  const storageKey = `claim-result:${projectCode}`;
+
+  useEffect(() => { publicApi.brand().then((d) => { if (d?.systemName) setBrand(d); }).catch(() => {}); }, []);
+
+  const fetchProject = useCallback(async () => {
+    try {
+      const data = await claimApi.getNode(projectCode, fingerprint).catch(() => claimApi.getProject(projectCode, fingerprint));
+      setProject(data);
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setClaimResult(parsed);
+        if (parsed.claimToken) {
+          claimApi.getResult(projectCode, parsed.claimToken).then((fresh) => {
+            const normalized = normalizeClaimResult(fresh);
+            setClaimResult(normalized);
+            localStorage.setItem(storageKey, JSON.stringify(normalized));
+          }).catch(() => {});
+        }
+      } else if (data.userClaimed) {
+        setClaimResult({ rewardContent: data.userRewardContent, claimedAt: data.userClaimedAt });
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [projectCode, fingerprint]);
+
+  useEffect(() => { fetchProject(); }, [fetchProject]);
+
+  async function handleClaim() {
+    setClaiming(true);
+    setError("");
+    try {
+      const payload = {
+        fingerprint,
+        captchaProvider: project?.requireCaptcha ? "hcaptcha" : "",
+        hcaptchaToken,
+      };
+      const result = await claimApi.submitNode(projectCode, payload).catch(() => claimApi.submit(projectCode, { fingerprint }));
+      const normalized = normalizeClaimResult(result);
+      setClaimResult(normalized);
+      localStorage.setItem(storageKey, JSON.stringify(normalized));
+      setBurstTrigger(normalized.code || normalized.rewardContent || "success");
+      await fetchProject();
+    } catch (err) {
+      setError(err.message);
+      if (["CAPTCHA_INVALID", "HCAPTCHA_INVALID", "CAPTCHA_EXPIRED"].includes(err.code)) {
+        setHcaptchaToken("");
+        hcaptchaRef.current?.resetCaptcha?.();
+      }
+    } finally {
+      setClaiming(false);
+    }
+  }
+
+  function getClaimState() {
+    if (!project) return { disabled: true, text: "加载中..." };
+    if (project.userClaimed || claimResult) return { disabled: true, text: "已领取" };
+    if (!project.enabled || project.status === "disabled" || project.status === "paused" || project.status === "archived") return { disabled: true, text: "通道已关闭" };
+    if (project.status === "upcoming" || project.status === "draft") return { disabled: true, text: "尚未激活" };
+    if (project.status === "ended") return { disabled: true, text: "已过生命周期" };
+    if (project.status === "soldout" || project.status === "exhausted" || project.remaining <= 0) return { disabled: true, text: "资源已耗尽" };
+    if (project.needLogin && !isLoggedIn()) return { disabled: true, text: "需要身份验证" };
+    if (project.requireCaptcha && !hcaptchaToken) return { disabled: true, text: "请先完成人机验证" };
+    if (claiming) return { disabled: true, text: "正在领取..." };
+    return { disabled: false, text: "接入并领取" };
+  }
+
+  const claimState = getClaimState();
+
+  /* ── 加载状态 ── */
+  if (loading) {
+    return (
+      <div className="claim-shell">
+        <div className="claim-shell__center">
+          <div className="claim-loader"><div className="claim-loader__spinner" /></div>
+          <p style={{color: 'var(--cp-muted)', marginTop: '16px'}}>正在连接分发节点...</p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── 错误 / 404 ── */
+  if (error && !project) {
+    return (
+      <div className="claim-shell">
+        <div className="claim-shell__center">
+          <h2 style={{fontSize: '28px', fontWeight: 800, color: 'var(--cp-ink)', marginBottom: '12px'}}>节点不可达</h2>
+          <p style={{color: 'var(--cp-muted)'}}>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 严格拦截
+  if (project.status === "disabled" || project.status === "paused" || project.status === "archived") {
+    return (
+      <div className="claim-shell">
+        <div className="claim-shell__center">
+          <h2 style={{fontSize: '28px', fontWeight: 800, color: 'var(--cp-ink)', marginBottom: '12px'}}>通道已关停</h2>
+          <p style={{color: 'var(--cp-muted)'}}>该资源的释放已被管理员中断，无法继续访问。</p>
+        </div>
+      </div>
+    );
+  }
+
+  const progress = project.totalStock > 0 ? Math.round((project.claimedCount / project.totalStock) * 100) : 0;
+  const statusLabels = {
+    active: "正在分发", upcoming: "等待激活", draft: "等待激活", ended: "周期结束", soldout: "额度耗尽", exhausted: "额度耗尽", disabled: "已关停", paused: "已暂停",
+  };
+
+  return (
+    <div className="claim-shell">
+      <ParticleBurst trigger={burstTrigger} />
+
+      {/* 顶部品牌标识 */}
+      <header className="claim-brand anim-fade-up">
+        <div className="claim-brand__logo">{brand.logoText}</div>
+        <div>
+          <h1>{brand.systemName}</h1>
+          <span>{brand.brandEnglishName}</span>
+        </div>
+      </header>
+
+      {/* 主内容区 — 全幅无卡片 */}
+      <div className="claim-content anim-fade-up stagger-1">
+
+        {/* 状态行 */}
+        <div className="claim-status-line">
+          <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+            <span className={`status-dot status--${project.status}`}>{statusLabels[project.status] || project.status}</span>
+            <span className="claim-time-range">{formatTime(project.startTime)} — {formatTime(project.endTime)}</span>
+          </div>
+          <div style={{fontSize: '12px', color: 'var(--cp-faint)', fontWeight: 600}}>PER USER LIMIT: {project.perUserLimit}X</div>
+        </div>
+
+        {/* 倒计时 (如果即将开启) — 移动到标题上方更显眼 */}
+        {(project.status === "upcoming" || project.status === "draft") && project.startTime && (
+          <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '40px', background: 'var(--cp-surface-hover)', padding: '32px', borderRadius: '16px', border: '1px solid var(--cp-brand-glow)'}}>
+            <h3 style={{fontSize: '13px', color: 'var(--cp-brand)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '20px'}}>距离分发网络开启还剩</h3>
+            <Countdown targetTime={project.startTime} onComplete={() => fetchProject()} />
+          </div>
+        )}
+
+        {/* 项目标题 */}
+        <h2 className="claim-title">{project.name}</h2>
+
+        {/* 主体区域 */}
+        <div style={{flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0}}>
+          <div style={{display: 'grid', gridTemplateColumns: project.rules ? '1.5fr 1fr' : '1fr', gap: '32px', flex: 1, minHeight: 0}}>
+            <div>
+              {project.description && (
+                <p className="claim-desc">{project.description}</p>
+              )}
+              
+              {/* 数据带 */}
+              <div className="claim-data-band anim-fade-up stagger-2">
+                <div className="claim-data-band__item" style={{paddingLeft: 0}}>
+                  <span className="claim-data-band__label">已释放负载</span>
+                  <span className="claim-data-band__value">{project.claimedCount}</span>
+                </div>
+                <div className="claim-data-band__item">
+                  <span className="claim-data-band__label">当前保留量</span>
+                  <span className="claim-data-band__value">{project.remaining}</span>
+                </div>
+                <div className="claim-data-band__item">
+                  <span className="claim-data-band__label">节点总容量</span>
+                  <span className="claim-data-band__value">{project.totalStock}</span>
+                </div>
+              </div>
+
+              {/* 进度条 */}
+              <div className="claim-track anim-fade-up stagger-2">
+                <div className="track-bar" style={{height: '10px', borderRadius: '5px'}}>
+                  <div className="track-bar__fill" style={{width: `${progress}%`}} />
+                </div>
+                <div className="track-meta">
+                  <span style={{fontWeight: 600}}>负载释放率 {progress}%</span>
+                {project.needLogin && <span style={{color: 'var(--cp-brand)', fontWeight: 600}}>需身份认证</span>}
+                </div>
+              </div>
+            </div>
+
+            {project.rules && (
+              <div className="claim-rules anim-fade-up stagger-3">
+                <h4>使用条款与协议</h4>
+                <p>{project.rules}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 底部领取区域 */}
+        <div className="claim-action anim-fade-up stagger-3" style={{padding: '24px 0 0', borderTop: '1px solid var(--cp-divider)', marginTop: '24px', flexShrink: 0}}>
+          {claimResult ? (
+            <div className="claim-result" style={{padding: 0, border: 'none', textAlign: 'center'}}>
+              <div className="claim-result__label" style={{fontSize: '16px', color: 'var(--cp-brand)', marginBottom: '24px'}}>领取成功 · CDK 已解锁</div>
+              <InlineCDKReveal code={claimResult.code || claimResult.rewardContent} claimedAt={claimResult.claimedAt} />
+            </div>
+          ) : (
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              {project.requireCaptcha && (
+                <HCaptchaBox
+                  ref={hcaptchaRef}
+                  onVerify={setHcaptchaToken}
+                  onExpire={() => setHcaptchaToken("")}
+                  onError={() => setHcaptchaToken("")}
+                />
+              )}
+              <button
+                className={`btn ${claimState.disabled ? "btn--secondary" : "btn--primary"} claim-action__btn`}
+                disabled={claimState.disabled}
+                onClick={handleClaim}
+                style={{height: '48px', maxWidth: '320px', fontSize: '16px', width: '100%'}}
+              >
+                {project.buttonText && !claimState.disabled && !claiming ? project.buttonText : claimState.text}
+              </button>
+              {error && <p className="claim-error" style={{textAlign: 'center'}}>{error}</p>}
+            </div>
+          )}
+        </div>
+
+        {/* 登录提示 */}
+        {project.needLogin && !isLoggedIn() && !claimResult && (
+          <div className="claim-login-hint" style={{marginTop: '16px', padding: '16px 0 0', textAlign: 'center', borderTop: '1px solid var(--cp-divider)', flexShrink: 0}}>
+            <p style={{margin: 0, display: 'inline-block', color: 'var(--cp-muted)'}}>此通道需要经过身份断言才能接入</p>
+            <a href={`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`} className="btn btn--text" style={{padding: '0 12px', color: 'var(--cp-brand)', fontWeight: 700}}>
+              前往验证身份 →
+            </a>
+          </div>
+        )}
+      </div>
+
+      {/* 底部 */}
+      <footer className="claim-footer-bar">
+        Powered by {brand.systemName} · {brand.brandEnglishName}
+      </footer>
+      {toast && <div className="toast" onAnimationEnd={() => {}}>{toast}</div>}
+    </div>
+  );
+}
+
+function normalizeClaimResult(result) {
+  return {
+    claimId: result.claimId,
+    claimToken: result.claimToken,
+    campaignId: result.campaignId,
+    nodeId: result.nodeId,
+    code: result.code || result.rewardContent,
+    rewardContent: result.rewardContent || result.code,
+    claimedAt: result.claimedAt,
+  };
+}

@@ -1,0 +1,123 @@
+
+> cdk-airdrop-station-web@0.1.0 dev
+> vite --host 127.0.0.1
+
+
+  [32m[1mVITE[22m v7.3.2[39m  [2mready in [0m[1m2074[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m5173[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m12:50:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/RegisterPage.jsx, /src/layouts/AdminLayout.jsx, /src/pages/LoginPage.jsx, /src/pages/admin/DashboardPage.jsx, /src/pages/admin/ProjectListPage.jsx, /src/pages/ClaimPage.jsx, /src/pages/admin/ProjectCreatePage.jsx, /src/pages/admin/ProjectDetailPage.jsx[22m
+[2m12:50:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m12:50:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m12:51:06[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage.jsx, /src/index.css[22m
+[2m12:51:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage.jsx, /src/index.css[22m
+[2m12:54:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/LoginPage.jsx, /src/index.css[22m
+[2m12:54:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/ClaimPage.jsx, /src/index.css[22m
+[2m12:55:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m12:55:26[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m13:05:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m13:05:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m13:17:14[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/RegisterPage.jsx, /src/layouts/AdminLayout.jsx, /src/pages/LoginPage.jsx, /src/pages/admin/ProjectListPage.jsx, /src/pages/ClaimPage.jsx, /src/pages/admin/ProjectCreatePage.jsx, /src/pages/admin/ProjectDetailPage.jsx, /src/pages/admin/DashboardPage.jsx, /src/pages/admin/CampaignListPage.jsx, /src/pages/admin/NodeListPage.jsx, /src/pages/admin/SettingsPage.jsx, /src/pages/admin/NodeDetailPage.jsx[22m
+[2m13:17:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m13:17:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m13:17:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m13:17:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m13:27:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/LoginPage.jsx, /src/index.css[22m
+[2m13:29:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m13:29:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m13:52:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/NodeListPage.jsx[22m
+[2m13:52:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/NodeDetailPage.jsx[22m
+[2m13:52:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m13:52:27[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m14:38:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/RegisterPage.jsx, /src/layouts/AdminLayout.jsx, /src/pages/LoginPage.jsx, /src/pages/admin/ProjectListPage.jsx, /src/pages/ClaimPage.jsx, /src/pages/admin/ProjectCreatePage.jsx, /src/pages/admin/ProjectDetailPage.jsx, /src/pages/admin/DashboardPage.jsx, /src/pages/admin/CampaignListPage.jsx, /src/pages/admin/NodeListPage.jsx, /src/pages/admin/SettingsPage.jsx, /src/pages/admin/NodeDetailPage.jsx[22m
+[2m14:38:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/ClaimPage.jsx, /src/index.css[22m
+[2m14:38:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ new dependencies optimized: [33m@hcaptcha/react-hcaptcha[32m[39m
+[2m14:38:40[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[2m14:39:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/ClaimPage.jsx, /src/index.css[22m
+[2m14:39:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m14:40:21[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/LoginPage.jsx, /src/index.css[22m
+[2m14:41:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/RegisterPage.jsx, /src/index.css[22m
+[2m14:42:10[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/RegisterPage.jsx, /src/index.css[22m
+[2m14:42:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage.jsx, /src/index.css[22m
+[2m14:43:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/SettingsPage.jsx[22m
+[2m14:44:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/components/ui.jsx[22m
+[2m14:44:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/ui.jsx[22m Could not Fast Refresh (new export)
+[2m14:44:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage.jsx, /src/pages/admin/CampaignListPage.jsx, /src/pages/admin/NodeListPage.jsx, /src/pages/admin/SettingsPage.jsx, /src/pages/admin/NodeDetailPage.jsx[22m
+[2m14:45:13[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/CampaignListPage.jsx[22m
+[2m14:46:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/NodeListPage.jsx[22m
+[2m14:46:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m14:47:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m14:47:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m14:48:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m14:48:16[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m14:57:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m14:57:25[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m15:04:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/components/Modal.jsx[22m
+[2m15:05:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage.jsx, /src/index.css[22m
+[2m15:06:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m15:06:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m15:23:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/components/ui.jsx[22m
+[2m15:23:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/components/ui.jsx[22m Could not Fast Refresh (new export)
+[2m15:23:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage.jsx, /src/pages/admin/CampaignListPage.jsx, /src/pages/admin/NodeListPage.jsx, /src/pages/admin/SettingsPage.jsx, /src/pages/admin/NodeDetailPage.jsx[22m
+[2m15:23:57[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m15:27:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m15:27:41[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m15:27:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage.jsx, /src/index.css[22m
+[2m15:28:50[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/DashboardPage.jsx, /src/index.css[22m
+[2m15:29:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m15:31:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m15:32:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m15:32:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m15:32:43[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/components/ui.jsx[22m
+[2m15:33:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m15:33:09[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m15:45:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m16:00:02[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m16:00:12[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m16:00:22[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m16:00:45[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m16:01:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m16:01:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m16:02:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m16:02:34[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m16:05:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m16:05:03[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m16:45:58[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m16:46:29[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m16:47:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/PlaceholderAdminPage.jsx[22m
+[2m16:47:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [33mhmr invalidate [39m[2m/src/pages/admin/PlaceholderAdminPage.jsx[22m Could not Fast Refresh (new export)
+[2m16:47:11[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx[22m
+[2m16:47:42[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m16:48:14[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m16:49:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m16:49:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m16:49:31[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m16:49:54[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/layouts/AdminLayout.jsx, /src/index.css[22m
+[2m16:50:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m16:51:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m16:51:24[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m20:48:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/RegisterPage.jsx, /src/layouts/AdminLayout.jsx, /src/pages/LoginPage.jsx, /src/pages/admin/ProjectListPage.jsx, /src/pages/ClaimPage.jsx, /src/pages/admin/ProjectCreatePage.jsx, /src/pages/admin/ProjectDetailPage.jsx, /src/pages/admin/CampaignListPage.jsx, /src/pages/admin/NodeListPage.jsx, /src/pages/admin/SettingsPage.jsx, /src/pages/admin/NodeDetailPage.jsx, /src/pages/admin/PlaceholderAdminPage.jsx, /src/pages/admin/DashboardPage.jsx[22m
+[2m20:48:05[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/RegisterPage.jsx, /src/layouts/AdminLayout.jsx, /src/pages/LoginPage.jsx, /src/pages/admin/ProjectListPage.jsx, /src/pages/ClaimPage.jsx, /src/pages/admin/ProjectCreatePage.jsx, /src/pages/admin/ProjectDetailPage.jsx, /src/pages/admin/CampaignListPage.jsx, /src/pages/admin/NodeListPage.jsx, /src/pages/admin/SettingsPage.jsx, /src/pages/admin/NodeDetailPage.jsx, /src/pages/admin/PlaceholderAdminPage.jsx, /src/pages/admin/DashboardPage.jsx[22m
+[2m20:48:20[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/components/ui.jsx[22m
+[2m20:48:48[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/CampaignListPage.jsx[22m
+[2m20:48:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/NodeListPage.jsx[22m
+[2m20:49:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProjectListPage.jsx, /src/index.css[22m
+[2m20:52:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/PlaceholderAdminPage.jsx[22m
+[2m20:52:39[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/PlaceholderAdminPage.jsx[22m
+[2m20:53:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/SettingsPage.jsx[22m
+[2m20:53:59[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/SettingsPage.jsx[22m
+[2m20:54:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProjectListPage.jsx, /src/index.css[22m
+[2m20:54:55[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/admin/ProjectListPage.jsx, /src/index.css[22m
+[2m20:56:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m20:56:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m20:59:28[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/ClaimPage.jsx, /src/index.css[22m
+[2m20:59:38[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/pages/ClaimPage.jsx, /src/index.css[22m
+[2m21:00:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m21:00:04[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m21:19:35[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/admin/PlaceholderAdminPage.jsx[22m
+[2m21:20:19[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m21:20:30[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.jsx, /src/index.css[22m
+[2m21:21:07[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/index.css[22m
+[2m21:22:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m
+[2m21:22:01[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdist/index.html[22m

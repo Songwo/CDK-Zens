@@ -1,0 +1,80 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "CP Campus Pulse CDK 空投站" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]: CP
+        - generic [ref=e8]:
+          - strong [ref=e9]: Campus Pulse
+          - generic [ref=e10]: CDK 空投站
+      - generic [ref=e11]:
+        - generic [ref=e12]: 社区附属功能站
+        - generic [ref=e13]: 激活码限量发放 / 定时开始 / CSV 导出
+      - navigation [ref=e14]:
+        - link "领取页" [ref=e15] [cursor=pointer]:
+          - /url: /
+        - link "管理台" [ref=e16] [cursor=pointer]:
+          - /url: /admin
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - paragraph [ref=e20]: CDK 空投站
+        - heading "活动状态同步中" [level=1] [ref=e21]
+        - paragraph [ref=e22]: 高并发实时发码通道，状态与库存在一条状态线上持续同步。
+      - generic [ref=e23]:
+        - generic [ref=e24]: 未开始
+        - generic [ref=e25]: 开始 --
+        - generic [ref=e26]: 结束 --
+        - generic [ref=e27]: 设备指纹兜底
+    - region "状态加载中" [ref=e28]
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e39]:
+          - paragraph [ref=e40]: 领取入口
+          - heading "社区用户领取通道" [level=2] [ref=e41]
+          - paragraph [ref=e42]: 输入账号后即时校验并发放，反馈直接在按钮内呈现。
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - generic [ref=e45]: 社区账号 / UID （选填）
+            - textbox "社区账号 / UID （选填）" [ref=e46]:
+              - /placeholder: 输入你的社区用户名或 UID
+          - generic [ref=e47]:
+            - button "等待开始" [disabled] [ref=e48]: 等待开始
+            - paragraph [ref=e52]: 正在同步活动状态
+            - paragraph [ref=e53]: ⚡ 通道待命中
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - generic [ref=e56]: 设备指纹
+            - generic [ref=e57]: 567bfb24-a1c9-4250-b17b-a1b268fdc5dd
+          - generic [ref=e58]:
+            - generic [ref=e59]: 已导入
+            - generic [ref=e60]: "--"
+          - generic [ref=e61]:
+            - generic [ref=e62]: 剩余数量
+            - generic [ref=e63]: "--"
+      - generic [ref=e64]:
+        - generic [ref=e66]:
+          - paragraph [ref=e67]: 终端回显
+          - heading "激活码揭示" [level=2] [ref=e68]
+          - paragraph [ref=e69]: 保留终端式逐字展示，但只在局部保留深色终端区域，不再让整个页面走赛博玻璃风。
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - generic [ref=e72]: Activation Console
+            - button "复制代码" [disabled] [ref=e73]
+          - generic [ref=e74]:
+            - generic [ref=e75]: $
+            - generic [ref=e76]: await cdk.signal()
+          - paragraph [ref=e78]: 成功领取后逐字符显示。
+      - generic [ref=e79]:
+        - generic [ref=e81]:
+          - paragraph [ref=e82]: 活动说明
+          - heading "活动规则与说明" [level=2] [ref=e83]
+          - paragraph [ref=e84]: 支持 Markdown 渲染，适合直接复用主站活动帖中的说明文本。
+        - generic [ref=e85]:
+          - heading "活动说明" [level=3] [ref=e86]
+          - list [ref=e87]:
+            - listitem [ref=e88]: 正在连接主站活动配置，请稍候。
+      - generic [ref=e91]:
+        - paragraph [ref=e92]: 公开记录
+        - heading "最近领取记录" [level=2] [ref=e93]
+        - paragraph [ref=e94]: 只展示脱敏结果，弱化装饰，强调信息可读性。

@@ -1,0 +1,32 @@
+services:
+  miukey:
+    build:
+      context: .
+      args:
+        VITE_HCAPTCHA_SITE_KEY: ${VITE_HCAPTCHA_SITE_KEY:-10000000-ffff-ffff-ffff-000000000001}
+    ports:
+      - "8088:8088"
+    environment:
+      - CDK_AIRDROP_REDIS_URL=redis://redis:6379/0
+      - CDK_AIRDROP_RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - CDK_AIRDROP_DATA_FILE=/app/data/state.json
+      - HCAPTCHA_SECRET=${HCAPTCHA_SECRET:-}
+      - HCAPTCHA_VERIFY_URL=${HCAPTCHA_VERIFY_URL:-https://api.hcaptcha.com/siteverify}
+      - CDK_COMMUNITY_URL=${CDK_COMMUNITY_URL:-http://localhost:5173}
+      - CDK_COMMUNITY_CLIENT_ID=${CDK_COMMUNITY_CLIENT_ID:-cdk-airdrop}
+    volumes:
+      - ./server/data:/app/data
+    depends_on:
+      - redis
+      - rabbitmq
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672" # Management UI

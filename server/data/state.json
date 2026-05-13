@@ -1,0 +1,1565 @@
+{
+  "projects": {
+    "1kmLjEejNIom": {
+      "id": "1kmLjEejNIom",
+      "name": "校园节点共建者激励计划",
+      "description": "面向参与内容建设、话题运营和社区维护的核心用户发放限量 CDK，用于兑换共建者专属身份和后续激励权益。",
+      "status": "active",
+      "campaignIds": null,
+      "nodeIds": null,
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00",
+      "projectCode": "I4bDJq2W",
+      "creatorId": "KQKlbiA2D4dj",
+      "startTime": "2026-05-15T12:00:00+08:00",
+      "endTime": "2026-05-31T23:59:00+08:00",
+      "totalStock": 5,
+      "perUserLimit": 1,
+      "rewardType": "cdk_list",
+      "enabled": true,
+      "rules": "本活动仅面向受邀用户开放。每个设备和 IP 限领一次，库存有限，领完即止。",
+      "rewardItems": [
+        {
+          "id": "z8346sUO",
+          "content": "MIU-BUILDER-NODE-A001",
+          "status": "unused"
+        },
+        {
+          "id": "92XNHkWT",
+          "content": "MIU-BUILDER-NODE-A002",
+          "status": "unused"
+        },
+        {
+          "id": "Ft69g8Ui",
+          "content": "MIU-BUILDER-NODE-A003",
+          "status": "unused"
+        },
+        {
+          "id": "7t0cqwzk",
+          "content": "MIU-BUILDER-NODE-A004",
+          "status": "unused"
+        },
+        {
+          "id": "78hd89RO",
+          "content": "MIU-BUILDER-NODE-A005",
+          "status": "unused"
+        }
+      ]
+    },
+    "JjOGD5jjzNIu": {
+      "id": "JjOGD5jjzNIu",
+      "name": "测试aaaa",
+      "description": "",
+      "status": "active",
+      "campaignIds": null,
+      "nodeIds": null,
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00",
+      "projectCode": "rMWhuuCF",
+      "startTime": "2026-04-28T10:49:00.000Z",
+      "endTime": "2026-04-28T15:59:00.000Z",
+      "totalStock": 7,
+      "perUserLimit": 1,
+      "rewardType": "cdk_list",
+      "enabled": true,
+      "rules": "注意不能二次领取",
+      "rewardItems": [
+        {
+          "id": "XXXnWUhD",
+          "content": "a",
+          "status": "unused"
+        },
+        {
+          "id": "cxdTLaKi",
+          "content": "b",
+          "status": "unused"
+        },
+        {
+          "id": "Kit8N9U1",
+          "content": "v",
+          "status": "unused"
+        },
+        {
+          "id": "QHGw5MAN",
+          "content": "c",
+          "status": "unused"
+        },
+        {
+          "id": "nU6jr45z",
+          "content": "d",
+          "status": "unused"
+        },
+        {
+          "id": "hAnHSpfz",
+          "content": "e",
+          "status": "unused"
+        },
+        {
+          "id": "yTPaqjTK",
+          "content": "s",
+          "status": "unused"
+        }
+      ]
+    },
+    "LAzzBQValqeA": {
+      "id": "LAzzBQValqeA",
+      "name": "Test Project",
+      "description": "",
+      "status": "archived",
+      "campaignIds": null,
+      "nodeIds": null,
+      "createdAt": "2026-04-28T16:48:49+08:00",
+      "updatedAt": "2026-05-13T15:29:13+08:00",
+      "projectCode": "JIeyYRai",
+      "startTime": "2026-04-28T08:48:00.000Z",
+      "endTime": "2026-05-05T08:48:00.000Z",
+      "totalStock": 3,
+      "claimedCount": 1,
+      "perUserLimit": 1,
+      "rewardType": "cdk_list",
+      "rewardItems": [
+        {
+          "id": "lfBngTzk",
+          "content": "CDK-001",
+          "status": "claimed",
+          "claimedBy": "bf71f0f5-e1c5-42c6-87f8-c9d47c72d5ae",
+          "claimedAt": "2026-04-28T16:49:27+08:00"
+        },
+        {
+          "id": "6sPDlt3g",
+          "content": "CDK-002",
+          "status": "unused"
+        },
+        {
+          "id": "Flz0N5au",
+          "content": "CDK-003",
+          "status": "unused"
+        }
+      ],
+      "claimRecords": [
+        {
+          "id": "KtPNDyxZHT0E",
+          "campaignId": "",
+          "nodeId": "",
+          "projectId": "LAzzBQValqeA",
+          "cdkId": "",
+          "code": "",
+          "status": "",
+          "reason": "",
+          "ip": "127.0.0.1",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "fingerprint": "bf71f0f5-e1c5-42c6-87f8-c9d47c72d5ae",
+          "idempotencyKey": "",
+          "claimToken": "",
+          "hcaptchaPassed": false,
+          "riskHit": false,
+          "riskRuleIds": null,
+          "createdAt": "2026-04-28T16:49:27+08:00",
+          "rewardItemId": "lfBngTzk",
+          "rewardContent": "CDK-001"
+        }
+      ]
+    },
+    "LsxhqsMYgn3r": {
+      "id": "LsxhqsMYgn3r",
+      "name": "Test",
+      "description": "",
+      "status": "active",
+      "campaignIds": null,
+      "nodeIds": null,
+      "createdAt": "2026-04-28T17:10:00+08:00",
+      "updatedAt": "2026-04-29T18:25:12+08:00",
+      "projectCode": "9EZWIO9G",
+      "startTime": "2026-04-28T09:09:00.000Z",
+      "endTime": "2046-04-28T09:09:00.000Z",
+      "totalStock": 2,
+      "claimedCount": 2,
+      "perUserLimit": 1,
+      "rewardType": "cdk_list",
+      "rewardItems": [
+        {
+          "id": "yCD4OF4p",
+          "content": "A",
+          "status": "claimed",
+          "claimedBy": "bf71f0f5-e1c5-42c6-87f8-c9d47c72d5ae",
+          "claimedAt": "2026-04-28T17:20:10+08:00"
+        },
+        {
+          "id": "BpQMTgae",
+          "content": "B",
+          "status": "claimed",
+          "claimedBy": "45361b57-2254-4cd4-a9c8-8eb4505682e6",
+          "claimedAt": "2026-04-29T18:24:50+08:00"
+        }
+      ],
+      "claimRecords": [
+        {
+          "id": "WYZgNse9oiip",
+          "campaignId": "",
+          "nodeId": "",
+          "projectId": "LsxhqsMYgn3r",
+          "cdkId": "",
+          "code": "",
+          "status": "",
+          "reason": "",
+          "ip": "127.0.0.1",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "fingerprint": "bf71f0f5-e1c5-42c6-87f8-c9d47c72d5ae",
+          "idempotencyKey": "",
+          "claimToken": "",
+          "hcaptchaPassed": false,
+          "riskHit": false,
+          "riskRuleIds": null,
+          "createdAt": "2026-04-28T17:20:10+08:00",
+          "rewardItemId": "yCD4OF4p",
+          "rewardContent": "A"
+        },
+        {
+          "id": "ReudRHwMYP8I",
+          "campaignId": "",
+          "nodeId": "",
+          "projectId": "LsxhqsMYgn3r",
+          "cdkId": "",
+          "code": "",
+          "status": "",
+          "reason": "",
+          "ip": "127.0.0.1",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "fingerprint": "45361b57-2254-4cd4-a9c8-8eb4505682e6",
+          "idempotencyKey": "",
+          "claimToken": "",
+          "hcaptchaPassed": false,
+          "riskHit": false,
+          "riskRuleIds": null,
+          "createdAt": "2026-04-29T18:24:50+08:00",
+          "rewardItemId": "BpQMTgae",
+          "rewardContent": "B"
+        }
+      ]
+    },
+    "O8wvAWgkGFIV": {
+      "id": "O8wvAWgkGFIV",
+      "name": "2026 新生权益礼包",
+      "description": "面向新注册用户发放校园社区专属权益礼包。每个设备限领一次，领取后可在个人中心兑换对应权益。",
+      "status": "active",
+      "campaignIds": null,
+      "nodeIds": null,
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00",
+      "projectCode": "wQLCOnhn",
+      "creatorId": "KQKlbiA2D4dj",
+      "startTime": "2026-05-12T10:00:00+08:00",
+      "endTime": "2026-06-12T23:59:00+08:00",
+      "totalStock": 5,
+      "claimedCount": 1,
+      "perUserLimit": 1,
+      "rewardType": "cdk_list",
+      "enabled": true,
+      "rules": "每位用户仅可领取一次。CDK 不可重复兑换，不可转售。若发现异常领取行为，平台有权冻结对应权益。",
+      "rewardItems": [
+        {
+          "id": "Dp83QQPW",
+          "content": "MIU-FRESH-2026-0001",
+          "status": "claimed",
+          "claimedBy": "Jmbwmr3NT23S",
+          "claimedAt": "2026-05-12T15:15:34+08:00"
+        },
+        {
+          "id": "eli7syxO",
+          "content": "MIU-FRESH-2026-0002",
+          "status": "unused"
+        },
+        {
+          "id": "ghtR8xEv",
+          "content": "MIU-FRESH-2026-0003",
+          "status": "unused"
+        },
+        {
+          "id": "5BgSIGuq",
+          "content": "MIU-FRESH-2026-0004",
+          "status": "unused"
+        },
+        {
+          "id": "Ml3Bc5OB",
+          "content": "MIU-FRESH-2026-0005",
+          "status": "unused"
+        }
+      ],
+      "claimRecords": [
+        {
+          "id": "ZGqBi4pbcKlH",
+          "campaignId": "",
+          "nodeId": "node_OAAb2teyya",
+          "projectId": "O8wvAWgkGFIV",
+          "cdkId": "",
+          "code": "",
+          "status": "success",
+          "reason": "",
+          "ip": "127.0.0.1",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "fingerprint": "07544004-9bdf-4002-948a-66f69f5f996f",
+          "idempotencyKey": "O8wvAWgkGFIV:node_OAAb2teyya:fp:07544004-9bdf-4002-948a-66f69f5f996f",
+          "claimToken": "4kkV8cYLge97VVZscZkbLcDLkyg6RCwU",
+          "hcaptchaPassed": false,
+          "riskHit": false,
+          "riskRuleIds": null,
+          "createdAt": "2026-05-12T15:15:34+08:00",
+          "userId": "Jmbwmr3NT23S",
+          "rewardItemId": "Dp83QQPW",
+          "rewardContent": "MIU-FRESH-2026-0001"
+        }
+      ]
+    },
+    "dDo5PnbeDuah": {
+      "id": "dDo5PnbeDuah",
+      "name": "测试A",
+      "description": "进行测试的活动创建",
+      "status": "active",
+      "campaignIds": null,
+      "nodeIds": null,
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00",
+      "projectCode": "YizP2SNF",
+      "creatorId": "Jmbwmr3NT23S",
+      "startTime": "2026-05-12T05:34:00.000Z",
+      "endTime": "2026-05-14T06:10:00.000Z",
+      "totalStock": 7,
+      "claimedCount": 1,
+      "perUserLimit": 1,
+      "rewardType": "cdk_list",
+      "enabled": true,
+      "rewardItems": [
+        {
+          "id": "MTEFmr9Y",
+          "content": "a",
+          "status": "claimed",
+          "claimedBy": "Jmbwmr3NT23S",
+          "claimedAt": "2026-05-12T13:36:34+08:00"
+        },
+        {
+          "id": "WF6BRPmZ",
+          "content": "b",
+          "status": "unused"
+        },
+        {
+          "id": "98gRIRyd",
+          "content": "c",
+          "status": "unused"
+        },
+        {
+          "id": "kbVU42W7",
+          "content": "d",
+          "status": "unused"
+        },
+        {
+          "id": "RqtQLr4D",
+          "content": "e",
+          "status": "unused"
+        },
+        {
+          "id": "ZTFZYYwg",
+          "content": "f",
+          "status": "unused"
+        },
+        {
+          "id": "BK3hg2ou",
+          "content": "g",
+          "status": "unused"
+        }
+      ],
+      "claimRecords": [
+        {
+          "id": "7m2cdBDszxmd",
+          "campaignId": "",
+          "nodeId": "ko7dCLnn7xrb",
+          "projectId": "dDo5PnbeDuah",
+          "cdkId": "",
+          "code": "",
+          "status": "success",
+          "reason": "",
+          "ip": "127.0.0.1",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "fingerprint": "07544004-9bdf-4002-948a-66f69f5f996f",
+          "idempotencyKey": "",
+          "claimToken": "",
+          "hcaptchaPassed": false,
+          "riskHit": false,
+          "riskRuleIds": null,
+          "createdAt": "2026-05-12T13:36:34+08:00",
+          "userId": "Jmbwmr3NT23S",
+          "rewardItemId": "MTEFmr9Y",
+          "rewardContent": "a"
+        }
+      ]
+    },
+    "default_project": {
+      "id": "default_project",
+      "name": "默认项目",
+      "description": "旧活动自动迁移项目",
+      "status": "active",
+      "campaignIds": [
+        "O8wvAWgkGFIV",
+        "dDo5PnbeDuah",
+        "1kmLjEejNIom",
+        "JjOGD5jjzNIu",
+        "LAzzBQValqeA",
+        "LsxhqsMYgn3r"
+      ],
+      "nodeIds": [
+        "node_rki5lrfVHe",
+        "ko7dCLnn7xrb",
+        "node_8n0bKL8H2Q",
+        "node_OAAb2teyya",
+        "node_iwGfuFOR2o",
+        "ZWoN7IOap3HM",
+        "eyGt1RFxfpen",
+        "node_CmOlc19akZ",
+        "node_fSfZy9SELN"
+      ],
+      "createdAt": "2026-05-12T20:58:28+08:00",
+      "updatedAt": "2026-05-12T20:58:28+08:00"
+    }
+  },
+  "campaigns": {
+    "1kmLjEejNIom": {
+      "id": "1kmLjEejNIom",
+      "projectId": "default_project",
+      "name": "校园节点共建者激励计划",
+      "description": "面向参与内容建设、话题运营和社区维护的核心用户发放限量 CDK，用于兑换共建者专属身份和后续激励权益。",
+      "status": "active",
+      "totalStock": 5,
+      "claimedCount": 0,
+      "remainingCount": 5,
+      "startAt": "2026-05-15T12:00:00+08:00",
+      "endAt": "2026-05-31T23:59:00+08:00",
+      "allowRepeat": false,
+      "perUserLimit": 1,
+      "perIPLimit": 0,
+      "perDeviceLimit": 1,
+      "requireCaptchaDefault": false,
+      "nodeIds": [
+        "node_fSfZy9SELN",
+        "eyGt1RFxfpen"
+      ],
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00",
+      "projectCode": "I4bDJq2W",
+      "startTime": "2026-05-15T12:00:00+08:00",
+      "endTime": "2026-05-31T23:59:00+08:00",
+      "enabled": true,
+      "rules": "本活动仅面向受邀用户开放。每个设备和 IP 限领一次，库存有限，领完即止。"
+    },
+    "JjOGD5jjzNIu": {
+      "id": "JjOGD5jjzNIu",
+      "projectId": "default_project",
+      "name": "测试aaaa",
+      "description": "",
+      "status": "active",
+      "totalStock": 7,
+      "claimedCount": 0,
+      "remainingCount": 7,
+      "startAt": "2026-04-28T10:49:00.000Z",
+      "endAt": "2026-04-28T15:59:00.000Z",
+      "allowRepeat": false,
+      "perUserLimit": 1,
+      "perIPLimit": 0,
+      "perDeviceLimit": 1,
+      "requireCaptchaDefault": false,
+      "nodeIds": [
+        "node_iwGfuFOR2o"
+      ],
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00",
+      "projectCode": "rMWhuuCF",
+      "startTime": "2026-04-28T10:49:00.000Z",
+      "endTime": "2026-04-28T15:59:00.000Z",
+      "enabled": true,
+      "rules": "注意不能二次领取"
+    },
+    "LAzzBQValqeA": {
+      "id": "LAzzBQValqeA",
+      "projectId": "default_project",
+      "name": "Test Project",
+      "description": "",
+      "status": "paused",
+      "totalStock": 3,
+      "claimedCount": 1,
+      "remainingCount": 2,
+      "startAt": "2026-04-28T08:48:00.000Z",
+      "endAt": "2026-05-05T08:48:00.000Z",
+      "allowRepeat": false,
+      "perUserLimit": 1,
+      "perIPLimit": 0,
+      "perDeviceLimit": 1,
+      "requireCaptchaDefault": false,
+      "nodeIds": [
+        "node_8n0bKL8H2Q"
+      ],
+      "createdAt": "2026-04-28T16:48:49+08:00",
+      "updatedAt": "2026-04-28T17:19:09+08:00",
+      "projectCode": "JIeyYRai",
+      "startTime": "2026-04-28T08:48:00.000Z",
+      "endTime": "2026-05-05T08:48:00.000Z",
+      "enabled": false
+    },
+    "LsxhqsMYgn3r": {
+      "id": "LsxhqsMYgn3r",
+      "projectId": "default_project",
+      "name": "Test",
+      "description": "",
+      "status": "paused",
+      "totalStock": 2,
+      "claimedCount": 2,
+      "remainingCount": 0,
+      "startAt": "2026-04-28T09:09:00.000Z",
+      "endAt": "2046-04-28T09:09:00.000Z",
+      "allowRepeat": false,
+      "perUserLimit": 1,
+      "perIPLimit": 0,
+      "perDeviceLimit": 1,
+      "requireCaptchaDefault": false,
+      "nodeIds": [
+        "node_CmOlc19akZ"
+      ],
+      "createdAt": "2026-04-28T17:10:00+08:00",
+      "updatedAt": "2026-04-29T18:25:12+08:00",
+      "projectCode": "9EZWIO9G",
+      "startTime": "2026-04-28T09:09:00.000Z",
+      "endTime": "2046-04-28T09:09:00.000Z",
+      "enabled": false
+    },
+    "O8wvAWgkGFIV": {
+      "id": "O8wvAWgkGFIV",
+      "projectId": "default_project",
+      "name": "2026 新生权益礼包",
+      "description": "面向新注册用户发放校园社区专属权益礼包。每个设备限领一次，领取后可在个人中心兑换对应权益。",
+      "status": "paused",
+      "totalStock": 5,
+      "claimedCount": 2,
+      "remainingCount": 3,
+      "startAt": "2026-05-12T10:00:00+08:00",
+      "endAt": "2026-06-12T23:59:00+08:00",
+      "allowRepeat": false,
+      "perUserLimit": 1,
+      "perIPLimit": 0,
+      "perDeviceLimit": 1,
+      "requireCaptchaDefault": false,
+      "nodeIds": [
+        "ZWoN7IOap3HM",
+        "node_OAAb2teyya"
+      ],
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-13T15:28:32+08:00",
+      "projectCode": "wQLCOnhn",
+      "startTime": "2026-05-12T10:00:00+08:00",
+      "endTime": "2026-06-12T23:59:00+08:00",
+      "enabled": false,
+      "rules": "每位用户仅可领取一次。CDK 不可重复兑换，不可转售。若发现异常领取行为，平台有权冻结对应权益。"
+    },
+    "dDo5PnbeDuah": {
+      "id": "dDo5PnbeDuah",
+      "projectId": "default_project",
+      "name": "测试A",
+      "description": "进行测试的活动创建",
+      "status": "active",
+      "totalStock": 7,
+      "claimedCount": 1,
+      "remainingCount": 6,
+      "startAt": "2026-05-12T05:34:00.000Z",
+      "endAt": "2026-05-14T06:10:00.000Z",
+      "allowRepeat": false,
+      "perUserLimit": 1,
+      "perIPLimit": 0,
+      "perDeviceLimit": 1,
+      "requireCaptchaDefault": false,
+      "nodeIds": [
+        "node_rki5lrfVHe",
+        "ko7dCLnn7xrb"
+      ],
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00",
+      "projectCode": "YizP2SNF",
+      "startTime": "2026-05-12T05:34:00.000Z",
+      "endTime": "2026-05-14T06:10:00.000Z",
+      "enabled": true
+    }
+  },
+  "cdks": {
+    "5BgSIGuq": {
+      "id": "5BgSIGuq",
+      "campaignId": "O8wvAWgkGFIV",
+      "code": "MIU-FRESH-2026-0004",
+      "status": "claimed",
+      "claimedByRecordId": "sRBgFi8hJ724",
+      "claimedAt": "2026-05-12T22:07:19+08:00",
+      "nodeId": "ZWoN7IOap3HM",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T22:07:19+08:00"
+    },
+    "6sPDlt3g": {
+      "id": "6sPDlt3g",
+      "campaignId": "LAzzBQValqeA",
+      "code": "CDK-002",
+      "status": "unused",
+      "createdAt": "2026-04-28T16:48:49+08:00",
+      "updatedAt": "2026-04-28T17:19:09+08:00"
+    },
+    "78hd89RO": {
+      "id": "78hd89RO",
+      "campaignId": "1kmLjEejNIom",
+      "code": "MIU-BUILDER-NODE-A005",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00"
+    },
+    "7t0cqwzk": {
+      "id": "7t0cqwzk",
+      "campaignId": "1kmLjEejNIom",
+      "code": "MIU-BUILDER-NODE-A004",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00"
+    },
+    "92XNHkWT": {
+      "id": "92XNHkWT",
+      "campaignId": "1kmLjEejNIom",
+      "code": "MIU-BUILDER-NODE-A002",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00"
+    },
+    "98gRIRyd": {
+      "id": "98gRIRyd",
+      "campaignId": "dDo5PnbeDuah",
+      "code": "c",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00"
+    },
+    "BK3hg2ou": {
+      "id": "BK3hg2ou",
+      "campaignId": "dDo5PnbeDuah",
+      "code": "g",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00"
+    },
+    "BpQMTgae": {
+      "id": "BpQMTgae",
+      "campaignId": "LsxhqsMYgn3r",
+      "code": "B",
+      "status": "claimed",
+      "claimedByRecordId": "ReudRHwMYP8I",
+      "claimedAt": "2026-04-29T18:24:50+08:00",
+      "createdAt": "2026-04-28T17:10:00+08:00",
+      "updatedAt": "2026-04-29T18:24:50+08:00"
+    },
+    "Dp83QQPW": {
+      "id": "Dp83QQPW",
+      "campaignId": "O8wvAWgkGFIV",
+      "code": "MIU-FRESH-2026-0001",
+      "status": "claimed",
+      "claimedByRecordId": "ZGqBi4pbcKlH",
+      "claimedAt": "2026-05-12T15:15:34+08:00",
+      "nodeId": "node_OAAb2teyya",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T15:15:34+08:00"
+    },
+    "Flz0N5au": {
+      "id": "Flz0N5au",
+      "campaignId": "LAzzBQValqeA",
+      "code": "CDK-003",
+      "status": "unused",
+      "createdAt": "2026-04-28T16:48:49+08:00",
+      "updatedAt": "2026-04-28T17:19:09+08:00"
+    },
+    "Ft69g8Ui": {
+      "id": "Ft69g8Ui",
+      "campaignId": "1kmLjEejNIom",
+      "code": "MIU-BUILDER-NODE-A003",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00"
+    },
+    "Kit8N9U1": {
+      "id": "Kit8N9U1",
+      "campaignId": "JjOGD5jjzNIu",
+      "code": "v",
+      "status": "unused",
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00"
+    },
+    "MTEFmr9Y": {
+      "id": "MTEFmr9Y",
+      "campaignId": "dDo5PnbeDuah",
+      "code": "a",
+      "status": "claimed",
+      "claimedByRecordId": "7m2cdBDszxmd",
+      "claimedAt": "2026-05-12T13:36:34+08:00",
+      "nodeId": "ko7dCLnn7xrb",
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:36:34+08:00"
+    },
+    "Ml3Bc5OB": {
+      "id": "Ml3Bc5OB",
+      "campaignId": "O8wvAWgkGFIV",
+      "code": "MIU-FRESH-2026-0005",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00"
+    },
+    "QHGw5MAN": {
+      "id": "QHGw5MAN",
+      "campaignId": "JjOGD5jjzNIu",
+      "code": "c",
+      "status": "unused",
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00"
+    },
+    "RqtQLr4D": {
+      "id": "RqtQLr4D",
+      "campaignId": "dDo5PnbeDuah",
+      "code": "e",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00"
+    },
+    "WF6BRPmZ": {
+      "id": "WF6BRPmZ",
+      "campaignId": "dDo5PnbeDuah",
+      "code": "b",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00"
+    },
+    "XXXnWUhD": {
+      "id": "XXXnWUhD",
+      "campaignId": "JjOGD5jjzNIu",
+      "code": "a",
+      "status": "unused",
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00"
+    },
+    "ZTFZYYwg": {
+      "id": "ZTFZYYwg",
+      "campaignId": "dDo5PnbeDuah",
+      "code": "f",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00"
+    },
+    "cxdTLaKi": {
+      "id": "cxdTLaKi",
+      "campaignId": "JjOGD5jjzNIu",
+      "code": "b",
+      "status": "unused",
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00"
+    },
+    "eli7syxO": {
+      "id": "eli7syxO",
+      "campaignId": "O8wvAWgkGFIV",
+      "code": "MIU-FRESH-2026-0002",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00"
+    },
+    "ghtR8xEv": {
+      "id": "ghtR8xEv",
+      "campaignId": "O8wvAWgkGFIV",
+      "code": "MIU-FRESH-2026-0003",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00"
+    },
+    "hAnHSpfz": {
+      "id": "hAnHSpfz",
+      "campaignId": "JjOGD5jjzNIu",
+      "code": "e",
+      "status": "unused",
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00"
+    },
+    "kbVU42W7": {
+      "id": "kbVU42W7",
+      "campaignId": "dDo5PnbeDuah",
+      "code": "d",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00"
+    },
+    "lfBngTzk": {
+      "id": "lfBngTzk",
+      "campaignId": "LAzzBQValqeA",
+      "code": "CDK-001",
+      "status": "claimed",
+      "claimedByRecordId": "KtPNDyxZHT0E",
+      "claimedAt": "2026-04-28T16:49:27+08:00",
+      "createdAt": "2026-04-28T16:48:49+08:00",
+      "updatedAt": "2026-04-28T16:49:27+08:00"
+    },
+    "nU6jr45z": {
+      "id": "nU6jr45z",
+      "campaignId": "JjOGD5jjzNIu",
+      "code": "d",
+      "status": "unused",
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00"
+    },
+    "yCD4OF4p": {
+      "id": "yCD4OF4p",
+      "campaignId": "LsxhqsMYgn3r",
+      "code": "A",
+      "status": "claimed",
+      "claimedByRecordId": "WYZgNse9oiip",
+      "claimedAt": "2026-04-28T17:20:10+08:00",
+      "createdAt": "2026-04-28T17:10:00+08:00",
+      "updatedAt": "2026-04-28T17:20:10+08:00"
+    },
+    "yTPaqjTK": {
+      "id": "yTPaqjTK",
+      "campaignId": "JjOGD5jjzNIu",
+      "code": "s",
+      "status": "unused",
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-04-28T17:50:05+08:00"
+    },
+    "z8346sUO": {
+      "id": "z8346sUO",
+      "campaignId": "1kmLjEejNIom",
+      "code": "MIU-BUILDER-NODE-A001",
+      "status": "unused",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00"
+    }
+  },
+  "nodes": {
+    "ZWoN7IOap3HM": {
+      "id": "ZWoN7IOap3HM",
+      "projectId": "default_project",
+      "campaignId": "O8wvAWgkGFIV",
+      "name": "新生注册入口",
+      "slug": "freshman-2026",
+      "status": "active",
+      "title": "2026 新生权益礼包",
+      "description": "欢迎加入校园社区。完成领取后，你将获得一枚专属权益兑换码，可用于激活新生礼包。",
+      "buttonText": "领取新生礼包",
+      "requireCaptcha": false,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 9,
+      "uniqueVisitors": 2,
+      "claims": 1,
+      "failedClaims": 0,
+      "lastVisitedAt": "2026-05-13T15:28:56+08:00",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-13T15:28:56+08:00",
+      "ipLimitEnabled": true,
+      "deviceLimitEnabled": true
+    },
+    "eyGt1RFxfpen": {
+      "id": "eyGt1RFxfpen",
+      "projectId": "default_project",
+      "campaignId": "1kmLjEejNIom",
+      "name": "共建者专属入口",
+      "slug": "builder-node",
+      "status": "active",
+      "title": "校园节点共建者空投",
+      "description": "感谢你参与校园社区建设。本入口用于领取共建者专属权益钥匙，请妥善保存领取到的 CDK。",
+      "buttonText": "领取共建者权益",
+      "requireCaptcha": true,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 2,
+      "uniqueVisitors": 0,
+      "claims": 0,
+      "failedClaims": 0,
+      "lastVisitedAt": "2026-05-12T13:30:05+08:00",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:30:05+08:00",
+      "ipLimitEnabled": true,
+      "deviceLimitEnabled": true
+    },
+    "ko7dCLnn7xrb": {
+      "id": "ko7dCLnn7xrb",
+      "projectId": "default_project",
+      "campaignId": "dDo5PnbeDuah",
+      "name": "阿松",
+      "slug": "song-free",
+      "status": "active",
+      "title": "SAong-Zens",
+      "description": "SAong-Zens：分发活动cdk",
+      "buttonText": "立即领取",
+      "requireCaptcha": false,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 19,
+      "uniqueVisitors": 0,
+      "claims": 1,
+      "failedClaims": 0,
+      "lastVisitedAt": "2026-05-12T15:14:53+08:00",
+      "createdAt": "2026-05-12T13:36:11+08:00",
+      "updatedAt": "2026-05-12T15:14:53+08:00",
+      "deviceLimitEnabled": true
+    },
+    "node_8n0bKL8H2Q": {
+      "id": "node_8n0bKL8H2Q",
+      "projectId": "default_project",
+      "campaignId": "LAzzBQValqeA",
+      "name": "Test Project",
+      "slug": "JIeyYRai",
+      "status": "paused",
+      "title": "Test Project",
+      "description": "",
+      "buttonText": "立即领取",
+      "requireCaptcha": false,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 0,
+      "uniqueVisitors": 0,
+      "claims": 1,
+      "failedClaims": 0,
+      "createdAt": "2026-04-28T16:48:49+08:00",
+      "updatedAt": "2026-04-28T17:19:09+08:00",
+      "deviceLimitEnabled": true
+    },
+    "node_CmOlc19akZ": {
+      "id": "node_CmOlc19akZ",
+      "projectId": "default_project",
+      "campaignId": "LsxhqsMYgn3r",
+      "name": "Test",
+      "slug": "9EZWIO9G",
+      "status": "paused",
+      "title": "Test",
+      "description": "",
+      "buttonText": "立即领取",
+      "requireCaptcha": false,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 2,
+      "uniqueVisitors": 0,
+      "claims": 2,
+      "failedClaims": 0,
+      "lastVisitedAt": "2026-05-12T13:30:27+08:00",
+      "createdAt": "2026-04-28T17:10:00+08:00",
+      "updatedAt": "2026-05-12T13:30:27+08:00",
+      "deviceLimitEnabled": true
+    },
+    "node_OAAb2teyya": {
+      "id": "node_OAAb2teyya",
+      "projectId": "default_project",
+      "campaignId": "O8wvAWgkGFIV",
+      "name": "2026 新生权益礼包",
+      "slug": "wQLCOnhn",
+      "status": "active",
+      "title": "2026 新生权益礼包",
+      "description": "面向新注册用户发放校园社区专属权益礼包。每个设备限领一次，领取后可在个人中心兑换对应权益。",
+      "buttonText": "立即领取",
+      "requireCaptcha": false,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 5,
+      "uniqueVisitors": 0,
+      "claims": 1,
+      "failedClaims": 0,
+      "lastVisitedAt": "2026-05-12T15:15:42+08:00",
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T15:15:42+08:00",
+      "deviceLimitEnabled": true
+    },
+    "node_fSfZy9SELN": {
+      "id": "node_fSfZy9SELN",
+      "projectId": "default_project",
+      "campaignId": "1kmLjEejNIom",
+      "name": "校园节点共建者激励计划",
+      "slug": "I4bDJq2W",
+      "status": "active",
+      "title": "校园节点共建者激励计划",
+      "description": "面向参与内容建设、话题运营和社区维护的核心用户发放限量 CDK，用于兑换共建者专属身份和后续激励权益。",
+      "buttonText": "立即领取",
+      "requireCaptcha": false,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 0,
+      "uniqueVisitors": 0,
+      "claims": 0,
+      "failedClaims": 0,
+      "createdAt": "2026-05-12T13:14:08+08:00",
+      "updatedAt": "2026-05-12T13:14:08+08:00",
+      "deviceLimitEnabled": true
+    },
+    "node_iwGfuFOR2o": {
+      "id": "node_iwGfuFOR2o",
+      "projectId": "default_project",
+      "campaignId": "JjOGD5jjzNIu",
+      "name": "测试aaaa",
+      "slug": "rMWhuuCF",
+      "status": "active",
+      "title": "测试aaaa",
+      "description": "",
+      "buttonText": "立即领取",
+      "requireCaptcha": false,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 3,
+      "uniqueVisitors": 0,
+      "claims": 0,
+      "failedClaims": 0,
+      "lastVisitedAt": "2026-05-12T13:40:51+08:00",
+      "createdAt": "2026-04-28T17:50:05+08:00",
+      "updatedAt": "2026-05-12T13:40:51+08:00",
+      "deviceLimitEnabled": true
+    },
+    "node_rki5lrfVHe": {
+      "id": "node_rki5lrfVHe",
+      "projectId": "default_project",
+      "campaignId": "dDo5PnbeDuah",
+      "name": "测试A",
+      "slug": "YizP2SNF",
+      "status": "active",
+      "title": "测试A",
+      "description": "进行测试的活动创建",
+      "buttonText": "立即领取",
+      "requireCaptcha": false,
+      "showStock": true,
+      "showEndTime": true,
+      "visits": 0,
+      "uniqueVisitors": 0,
+      "claims": 1,
+      "failedClaims": 0,
+      "createdAt": "2026-05-12T13:35:10+08:00",
+      "updatedAt": "2026-05-12T13:35:10+08:00",
+      "deviceLimitEnabled": true
+    }
+  },
+  "claimRecords": {
+    "7m2cdBDszxmd": {
+      "id": "7m2cdBDszxmd",
+      "campaignId": "dDo5PnbeDuah",
+      "nodeId": "ko7dCLnn7xrb",
+      "projectId": "default_project",
+      "cdkId": "MTEFmr9Y",
+      "code": "a",
+      "status": "success",
+      "reason": "",
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      "fingerprint": "07544004-9bdf-4002-948a-66f69f5f996f",
+      "idempotencyKey": "",
+      "claimToken": "",
+      "hcaptchaPassed": false,
+      "riskHit": false,
+      "riskRuleIds": null,
+      "createdAt": "2026-05-12T13:36:34+08:00",
+      "userId": "Jmbwmr3NT23S",
+      "rewardItemId": "MTEFmr9Y",
+      "rewardContent": "a"
+    },
+    "KtPNDyxZHT0E": {
+      "id": "KtPNDyxZHT0E",
+      "campaignId": "LAzzBQValqeA",
+      "nodeId": "",
+      "projectId": "default_project",
+      "cdkId": "lfBngTzk",
+      "code": "CDK-001",
+      "status": "success",
+      "reason": "",
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      "fingerprint": "bf71f0f5-e1c5-42c6-87f8-c9d47c72d5ae",
+      "idempotencyKey": "",
+      "claimToken": "",
+      "hcaptchaPassed": false,
+      "riskHit": false,
+      "riskRuleIds": null,
+      "createdAt": "2026-04-28T16:49:27+08:00",
+      "rewardItemId": "lfBngTzk",
+      "rewardContent": "CDK-001"
+    },
+    "ReudRHwMYP8I": {
+      "id": "ReudRHwMYP8I",
+      "campaignId": "LsxhqsMYgn3r",
+      "nodeId": "",
+      "projectId": "default_project",
+      "cdkId": "BpQMTgae",
+      "code": "B",
+      "status": "success",
+      "reason": "",
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      "fingerprint": "45361b57-2254-4cd4-a9c8-8eb4505682e6",
+      "idempotencyKey": "",
+      "claimToken": "",
+      "hcaptchaPassed": false,
+      "riskHit": false,
+      "riskRuleIds": null,
+      "createdAt": "2026-04-29T18:24:50+08:00",
+      "rewardItemId": "BpQMTgae",
+      "rewardContent": "B"
+    },
+    "WYZgNse9oiip": {
+      "id": "WYZgNse9oiip",
+      "campaignId": "LsxhqsMYgn3r",
+      "nodeId": "",
+      "projectId": "default_project",
+      "cdkId": "yCD4OF4p",
+      "code": "A",
+      "status": "success",
+      "reason": "",
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      "fingerprint": "bf71f0f5-e1c5-42c6-87f8-c9d47c72d5ae",
+      "idempotencyKey": "",
+      "claimToken": "",
+      "hcaptchaPassed": false,
+      "riskHit": false,
+      "riskRuleIds": null,
+      "createdAt": "2026-04-28T17:20:10+08:00",
+      "rewardItemId": "yCD4OF4p",
+      "rewardContent": "A"
+    },
+    "ZGqBi4pbcKlH": {
+      "id": "ZGqBi4pbcKlH",
+      "campaignId": "O8wvAWgkGFIV",
+      "nodeId": "node_OAAb2teyya",
+      "projectId": "default_project",
+      "cdkId": "Dp83QQPW",
+      "code": "MIU-FRESH-2026-0001",
+      "status": "success",
+      "reason": "",
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      "fingerprint": "07544004-9bdf-4002-948a-66f69f5f996f",
+      "idempotencyKey": "O8wvAWgkGFIV:node_OAAb2teyya:fp:07544004-9bdf-4002-948a-66f69f5f996f",
+      "claimToken": "4kkV8cYLge97VVZscZkbLcDLkyg6RCwU",
+      "hcaptchaPassed": false,
+      "riskHit": false,
+      "riskRuleIds": null,
+      "createdAt": "2026-05-12T15:15:34+08:00",
+      "userId": "Jmbwmr3NT23S",
+      "rewardItemId": "Dp83QQPW",
+      "rewardContent": "MIU-FRESH-2026-0001"
+    },
+    "sRBgFi8hJ724": {
+      "id": "sRBgFi8hJ724",
+      "campaignId": "O8wvAWgkGFIV",
+      "nodeId": "ZWoN7IOap3HM",
+      "projectId": "default_project",
+      "cdkId": "5BgSIGuq",
+      "code": "MIU-FRESH-2026-0004",
+      "status": "success",
+      "reason": "",
+      "ip": "127.0.0.1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      "fingerprint": "07544004-9bdf-4002-948a-66f69f5f996f",
+      "idempotencyKey": "O8wvAWgkGFIV:ZWoN7IOap3HM:fp:07544004-9bdf-4002-948a-66f69f5f996f",
+      "claimToken": "I3MpVilv9DtrUTMQiRs9uO6mShnQddqm",
+      "hcaptchaPassed": false,
+      "riskHit": false,
+      "riskRuleIds": null,
+      "createdAt": "2026-05-12T22:07:19+08:00",
+      "userId": "Jmbwmr3NT23S",
+      "rewardItemId": "5BgSIGuq",
+      "rewardContent": "MIU-FRESH-2026-0004"
+    }
+  },
+  "riskRules": {
+    "rule_device_campaign": {
+      "id": "rule_device_campaign",
+      "name": "单设备同活动限制",
+      "type": "device_limit",
+      "enabled": true,
+      "config": {
+        "limit": 1
+      },
+      "action": "block",
+      "createdAt": "2026-05-12T20:58:28+08:00",
+      "updatedAt": "2026-05-12T20:58:28+08:00"
+    },
+    "rule_ip_minute": {
+      "id": "rule_ip_minute",
+      "name": "单 IP 每分钟限制",
+      "type": "rate_limit",
+      "enabled": true,
+      "config": {
+        "limit": 10,
+        "windowSeconds": 60
+      },
+      "action": "block",
+      "createdAt": "2026-05-12T20:58:28+08:00",
+      "updatedAt": "2026-05-12T20:58:28+08:00"
+    }
+  },
+  "blacklist": {},
+  "captchaConfig": {
+    "provider": "hcaptcha",
+    "enabled": false,
+    "hcaptchaSiteKeyConfigured": false,
+    "hcaptchaSecretConfigured": false,
+    "lastTestStatus": "failed",
+    "lastTestMessage": "未配置 HCAPTCHA_SECRET",
+    "lastTestAt": "2026-05-13T15:52:34+08:00"
+  },
+  "systemLogs": {
+    "8HK4PfA70QSl": {
+      "id": "8HK4PfA70QSl",
+      "type": "operation",
+      "level": "info",
+      "title": "暂停活动",
+      "message": "暂停活动 2026 新生权益礼包",
+      "actor": "0wcybSOCJ3rl",
+      "ip": "",
+      "targetType": "campaign",
+      "targetId": "O8wvAWgkGFIV",
+      "metadata": null,
+      "createdAt": "2026-05-13T15:28:32+08:00"
+    },
+    "CgDcYivMYFpf": {
+      "id": "CgDcYivMYFpf",
+      "type": "operation",
+      "level": "info",
+      "title": "归档项目",
+      "message": "归档项目 Test Project",
+      "actor": "0wcybSOCJ3rl",
+      "ip": "",
+      "targetType": "project",
+      "targetId": "LAzzBQValqeA",
+      "metadata": null,
+      "createdAt": "2026-05-13T15:29:13+08:00"
+    },
+    "GSIuetxZZDUH": {
+      "id": "GSIuetxZZDUH",
+      "type": "operation",
+      "level": "info",
+      "title": "创建管理员",
+      "message": "创建管理员 ZensAdmin_cK2r",
+      "actor": "ZensAdmin_cK2r",
+      "ip": "",
+      "targetType": "admin",
+      "targetId": "0wcybSOCJ3rl",
+      "metadata": null,
+      "createdAt": "2026-05-12T21:33:33+08:00"
+    },
+    "OZ7ZCdSN5CNz": {
+      "id": "OZ7ZCdSN5CNz",
+      "type": "operation",
+      "level": "info",
+      "title": "导出 CSV",
+      "message": "导出 cdks",
+      "actor": "0wcybSOCJ3rl",
+      "ip": "",
+      "targetType": "export",
+      "targetId": "Wi3TSjHn9KKn",
+      "metadata": null,
+      "createdAt": "2026-05-12T22:20:24+08:00"
+    },
+    "PX8852gzxk5q": {
+      "id": "PX8852gzxk5q",
+      "type": "claim",
+      "level": "info",
+      "title": "领取成功",
+      "message": "领取成功 MIU-FRESH-2026-0004",
+      "actor": "public",
+      "ip": "127.0.0.1",
+      "targetType": "claim",
+      "targetId": "sRBgFi8hJ724",
+      "metadata": {
+        "campaignId": "O8wvAWgkGFIV",
+        "nodeId": "ZWoN7IOap3HM"
+      },
+      "createdAt": "2026-05-12T22:07:19+08:00"
+    },
+    "QMmhYacyFoSP": {
+      "id": "QMmhYacyFoSP",
+      "type": "operation",
+      "level": "info",
+      "title": "修改系统设置",
+      "message": "修改系统设置",
+      "actor": "0wcybSOCJ3rl",
+      "ip": "",
+      "targetType": "settings",
+      "targetId": "global",
+      "metadata": null,
+      "createdAt": "2026-05-13T16:03:11+08:00"
+    },
+    "YjmlvWDmD6LF": {
+      "id": "YjmlvWDmD6LF",
+      "type": "operation",
+      "level": "info",
+      "title": "修改系统设置",
+      "message": "修改系统设置",
+      "actor": "0wcybSOCJ3rl",
+      "ip": "",
+      "targetType": "settings",
+      "targetId": "global",
+      "metadata": null,
+      "createdAt": "2026-05-13T15:39:31+08:00"
+    },
+    "ktmkJXP5hmPM": {
+      "id": "ktmkJXP5hmPM",
+      "type": "operation",
+      "level": "info",
+      "title": "修改系统设置",
+      "message": "修改系统设置",
+      "actor": "0wcybSOCJ3rl",
+      "ip": "",
+      "targetType": "settings",
+      "targetId": "global",
+      "metadata": null,
+      "createdAt": "2026-05-13T15:52:01+08:00"
+    }
+  },
+  "exportTasks": {
+    "Wi3TSjHn9KKn": {
+      "id": "Wi3TSjHn9KKn",
+      "type": "cdks",
+      "status": "done",
+      "filename": "cdks-20260512-222024.csv",
+      "filePath": "/api/admin/exports/cdks-20260512-222024.csv",
+      "filter": {},
+      "error": "",
+      "createdAt": "2026-05-12T22:20:24+08:00",
+      "finishedAt": "2026-05-12T22:20:24+08:00"
+    }
+  },
+  "settings": {
+    "systemName": "Zens-Song",
+    "brandName": "Zens社区CDK",
+    "brandEnglishName": "MiuBox Airdrop Hub",
+    "logoText": "MB",
+    "publicBaseURL": "http://127.0.0.1:5173",
+    "storageMode": "json",
+    "redisEnabled": false,
+    "rabbitmqEnabled": false,
+    "createdAt": "2026-05-12T20:58:28+08:00",
+    "updatedAt": "2026-05-13T16:03:11+08:00"
+  },
+  "admins": {
+    "0wcybSOCJ3rl": {
+      "id": "0wcybSOCJ3rl",
+      "username": "ZensAdmin_cK2r",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T21:33:33.123817+08:00",
+      "updatedAt": "2026-05-12T21:33:33+08:00"
+    },
+    "2Gw3i8wIA6rs": {
+      "id": "2Gw3i8wIA6rs",
+      "username": "ZensAdmin_Sww4",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:24:59.116167+08:00"
+    },
+    "A2aH2gPUBkAX": {
+      "id": "A2aH2gPUBkAX",
+      "username": "ZensAdmin_pumV",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T14:56:10.4172577+08:00"
+    },
+    "CzOTw35yNFbj": {
+      "id": "CzOTw35yNFbj",
+      "username": "ZensAdmin_IHyx",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:25:01.3273038+08:00"
+    },
+    "EmZ7mlML5Ew8": {
+      "id": "EmZ7mlML5Ew8",
+      "username": "ZensAdmin_nePx",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:06:54.3930551+08:00"
+    },
+    "Fj5I3Ck36wL9": {
+      "id": "Fj5I3Ck36wL9",
+      "username": "ZensAdmin_TrMq",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T15:12:49.2307408+08:00"
+    },
+    "Jmbwmr3NT23S": {
+      "id": "Jmbwmr3NT23S",
+      "username": "ZensAdmin_Zwcp",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:29:33.1357927+08:00"
+    },
+    "KQKlbiA2D4dj": {
+      "id": "KQKlbiA2D4dj",
+      "username": "ZensAdmin_IWUv",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:14:08.3161159+08:00"
+    },
+    "Ks1Pb9tjRwSn": {
+      "id": "Ks1Pb9tjRwSn",
+      "username": "ZensAdmin_ZDcU",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-04-29T14:24:03.1230292+08:00"
+    },
+    "LISOuHcZvpXm": {
+      "id": "LISOuHcZvpXm",
+      "username": "ZensAdmin_PLTz",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:24:54.7485836+08:00"
+    },
+    "Tuc5zNK5RYhK": {
+      "id": "Tuc5zNK5RYhK",
+      "username": "ZensAdmin_a8qf",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:24:56.7871736+08:00"
+    },
+    "UI5F9neRI4q3": {
+      "id": "UI5F9neRI4q3",
+      "username": "ZensAdmin_GqCC",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-04-28T17:46:49.5921331+08:00"
+    },
+    "Ym5FFwqVtCUs": {
+      "id": "Ym5FFwqVtCUs",
+      "username": "ZensAdmin_74NG",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-04-28T18:13:51.4000673+08:00"
+    },
+    "cpqA0axFyyws": {
+      "id": "cpqA0axFyyws",
+      "username": "Song",
+      "password": "123456sss",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:26:17.7847031+08:00"
+    },
+    "poE6knH6uigt": {
+      "id": "poE6knH6uigt",
+      "username": "ZensAdmin_UYW3",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T15:13:39.2567158+08:00"
+    },
+    "s4MecdLsJsHD": {
+      "id": "s4MecdLsJsHD",
+      "username": "ZensAdmin_Op9p",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:24:58.122719+08:00"
+    },
+    "tOQjcEsCECJx": {
+      "id": "tOQjcEsCECJx",
+      "username": "ZensAdmin_CbpC",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T13:24:46.1196113+08:00"
+    }
+  },
+  "users": {
+    "0wcybSOCJ3rl": {
+      "id": "0wcybSOCJ3rl",
+      "username": "ZensAdmin_cK2r",
+      "password": "sso_placeholder",
+      "role": "admin",
+      "createdAt": "2026-05-12T21:33:33.123817+08:00",
+      "updatedAt": "2026-05-12T21:33:33+08:00"
+    },
+    "2Gw3i8wIA6rs": {
+      "id": "2Gw3i8wIA6rs",
+      "username": "ZensAdmin_Sww4",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:24:59.116167+08:00"
+    },
+    "A2aH2gPUBkAX": {
+      "id": "A2aH2gPUBkAX",
+      "username": "ZensAdmin_pumV",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T14:56:10.4172577+08:00"
+    },
+    "CzOTw35yNFbj": {
+      "id": "CzOTw35yNFbj",
+      "username": "ZensAdmin_IHyx",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:25:01.3273038+08:00"
+    },
+    "EmZ7mlML5Ew8": {
+      "id": "EmZ7mlML5Ew8",
+      "username": "ZensAdmin_nePx",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:06:54.3930551+08:00"
+    },
+    "Fj5I3Ck36wL9": {
+      "id": "Fj5I3Ck36wL9",
+      "username": "ZensAdmin_TrMq",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T15:12:49.2307408+08:00"
+    },
+    "Jmbwmr3NT23S": {
+      "id": "Jmbwmr3NT23S",
+      "username": "ZensAdmin_Zwcp",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:29:33.1357927+08:00"
+    },
+    "KQKlbiA2D4dj": {
+      "id": "KQKlbiA2D4dj",
+      "username": "ZensAdmin_IWUv",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:14:08.3161159+08:00"
+    },
+    "Ks1Pb9tjRwSn": {
+      "id": "Ks1Pb9tjRwSn",
+      "username": "ZensAdmin_ZDcU",
+      "password": "sso_placeholder",
+      "createdAt": "2026-04-29T14:24:03.1230292+08:00"
+    },
+    "LISOuHcZvpXm": {
+      "id": "LISOuHcZvpXm",
+      "username": "ZensAdmin_PLTz",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:24:54.7485836+08:00"
+    },
+    "Tuc5zNK5RYhK": {
+      "id": "Tuc5zNK5RYhK",
+      "username": "ZensAdmin_a8qf",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:24:56.7871736+08:00"
+    },
+    "UI5F9neRI4q3": {
+      "id": "UI5F9neRI4q3",
+      "username": "ZensAdmin_GqCC",
+      "password": "sso_placeholder",
+      "createdAt": "2026-04-28T17:46:49.5921331+08:00"
+    },
+    "Ym5FFwqVtCUs": {
+      "id": "Ym5FFwqVtCUs",
+      "username": "ZensAdmin_74NG",
+      "password": "sso_placeholder",
+      "createdAt": "2026-04-28T18:13:51.4000673+08:00"
+    },
+    "cpqA0axFyyws": {
+      "id": "cpqA0axFyyws",
+      "username": "Song",
+      "password": "123456sss",
+      "createdAt": "2026-05-12T13:26:17.7847031+08:00"
+    },
+    "poE6knH6uigt": {
+      "id": "poE6knH6uigt",
+      "username": "ZensAdmin_UYW3",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T15:13:39.2567158+08:00"
+    },
+    "s4MecdLsJsHD": {
+      "id": "s4MecdLsJsHD",
+      "username": "ZensAdmin_Op9p",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:24:58.122719+08:00"
+    },
+    "tOQjcEsCECJx": {
+      "id": "tOQjcEsCECJx",
+      "username": "ZensAdmin_CbpC",
+      "password": "sso_placeholder",
+      "createdAt": "2026-05-12T13:24:46.1196113+08:00"
+    }
+  }
+}
