@@ -1,0 +1,11 @@
+.git
+.run
+.vscode
+.playwright-mcp
+web/node_modules
+web/vite.stdout.log
+web/vite.stderr.log
+server/bin
+server/server.stdout.log
+server/server.stderr.log
+bin

@@ -1,15 +1,3 @@
-# --- Build Frontend ---
-FROM node:20-alpine AS frontend-builder
-WORKDIR /web
-# 开启 npm 腾讯云内网/公网镜像加速 (解决网络重置问题)
-RUN npm config set registry http://mirrors.cloud.tencent.com/npm/
-ARG VITE_HCAPTCHA_SITE_KEY
-ENV VITE_HCAPTCHA_SITE_KEY=$VITE_HCAPTCHA_SITE_KEY
-COPY web/package*.json ./
-RUN npm install
-COPY web/ .
-RUN npm run build
-
 # --- Build Backend ---
 FROM golang:1.24-alpine AS backend-builder
 WORKDIR /server
@@ -28,9 +16,10 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositorie
 
 WORKDIR /app
 
-# Copy binaries and assets
+# Copy backend binary and prebuilt frontend assets.
+# Run `npm run build` in web/ on the server before building this image.
 COPY --from=backend-builder /server/miubox .
-COPY --from=frontend-builder /web/dist ./dist
+COPY web/dist ./dist
 
 # Create data directory
 RUN mkdir -p /app/data

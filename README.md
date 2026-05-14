@@ -28,18 +28,33 @@
 
 ## 🚀 快速启动
 
-### 方式一：一键 Docker 部署 (推荐 - 包含并发组件)
+### 方式一：服务器 Docker 部署
 
-**Windows 用户**:
-双击运行 `deploy.bat`
+当前 Dockerfile 不在镜像内执行 `npm install`，需要先在服务器生成前端产物，再构建镜像：
 
-**Linux / macOS 用户**:
 ```bash
+cd web
+npm install
+npm run build
+cd ..
+
 chmod +x deploy.sh
 ./deploy.sh
 ```
 
-> **注意**：脚本会自动基于 `.env.example` 生成 `.env` 配置文件，并启动 CDK 服务以及内置的 Redis 和 RabbitMQ。访问 `http://localhost:8088` 即可进入系统。
+Linux 服务器部署默认使用 `network_mode: host`，应用容器访问服务器本机 MySQL 时请在 `.env` 中使用：
+
+```text
+CDK_MYSQL_DSN=用户名:密码@tcp(127.0.0.1:3306)/cdk_airdrop?parseTime=true&charset=utf8mb4&loc=Local
+```
+
+> 如果密码里有 `$`，写在 `.env` 里保持单个 `$`；只有直接写在 `docker-compose.yml` 中才需要写成 `$$`。
+
+Redis / RabbitMQ 为可选增强组件，默认不启动。如需启用：
+
+```bash
+docker compose --profile cache up -d --build
+```
 
 ### 方式二：本地开发环境
 
@@ -63,8 +78,9 @@ chmod +x deploy.sh
 | 变量名 | 说明 | 示例 |
 | --- | --- | --- |
 | `CDK_AIRDROP_ADDR` | 服务监听地址 | `:8088` |
-| `CDK_AIRDROP_REDIS_URL` | Redis 连接串 | `redis://localhost:6379/0` |
-| `CDK_AIRDROP_RABBITMQ_URL` | RabbitMQ 连接串 | `amqp://guest:guest@localhost:5672/` |
+| `CDK_MYSQL_DSN` | MySQL 连接串 | `user:pass@tcp(127.0.0.1:3306)/cdk_airdrop?parseTime=true&charset=utf8mb4&loc=Local` |
+| `CDK_AIRDROP_REDIS_URL` | Redis 连接串，可留空 | `redis://127.0.0.1:6379/0` |
+| `CDK_AIRDROP_RABBITMQ_URL` | RabbitMQ 连接串，可留空 | `amqp://guest:guest@127.0.0.1:5672/` |
 | `CDK_AIRDROP_DATA_FILE` | 状态存储路径 | `./data/state.json` |
 
 ---
