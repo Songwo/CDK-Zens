@@ -1,8 +1,8 @@
 # --- Build Frontend ---
 FROM node:20-alpine AS frontend-builder
 WORKDIR /web
-# 开启 npm 国内镜像加速
-RUN npm config set registry https://registry.npmmirror.com
+# 开启 npm 腾讯云内网/公网镜像加速 (解决网络重置问题)
+RUN npm config set registry http://mirrors.cloud.tencent.com/npm/
 ARG VITE_HCAPTCHA_SITE_KEY
 ENV VITE_HCAPTCHA_SITE_KEY=$VITE_HCAPTCHA_SITE_KEY
 COPY web/package*.json ./
