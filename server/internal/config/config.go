@@ -20,6 +20,9 @@ type Config struct {
 	HCaptchaVerifyURL string
 	HCaptchaSiteKey string
 
+	// MySQL
+	MySQLDSN string
+
 	// 社区 SSO 配置
 	CommunityURL      string
 	CommunityClientID string
@@ -64,6 +67,9 @@ func Load() (Config, error) {
 		HCaptchaSecret:  envOrDefault("HCAPTCHA_SECRET", ""),
 		HCaptchaVerifyURL: envOrDefault("HCAPTCHA_VERIFY_URL", "https://api.hcaptcha.com/siteverify"),
 		HCaptchaSiteKey: envOrDefault("HCAPTCHA_SITE_KEY", ""),
+
+		// MySQL
+		MySQLDSN: envOrDefault("CDK_MYSQL_DSN", ""),
 
 		// 社区 SSO
 		CommunityURL:      envOrDefault("CDK_COMMUNITY_URL", "http://localhost:5173"),

@@ -6,11 +6,15 @@ services:
         VITE_HCAPTCHA_SITE_KEY: ${VITE_HCAPTCHA_SITE_KEY:-10000000-ffff-ffff-ffff-000000000001}
     ports:
       - "8088:8088"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - CDK_AIRDROP_REDIS_URL=redis://redis:6379/0
       - CDK_AIRDROP_RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
       - CDK_AIRDROP_DATA_FILE=/app/data/state.json
+      - CDK_MYSQL_DSN=${CDK_MYSQL_DSN:-}
       - HCAPTCHA_SECRET=${HCAPTCHA_SECRET:-}
+      - HCAPTCHA_SITE_KEY=${HCAPTCHA_SITE_KEY:-}
       - HCAPTCHA_VERIFY_URL=${HCAPTCHA_VERIFY_URL:-https://api.hcaptcha.com/siteverify}
       - CDK_COMMUNITY_URL=${CDK_COMMUNITY_URL:-http://localhost:5173}
       - CDK_COMMUNITY_CLIENT_ID=${CDK_COMMUNITY_CLIENT_ID:-cdk-airdrop}

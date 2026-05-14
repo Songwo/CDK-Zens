@@ -11,7 +11,7 @@ COPY web/ .
 RUN npm run build
 
 # --- Build Backend ---
-FROM golang:1.22-alpine AS backend-builder
+FROM golang:1.24-alpine AS backend-builder
 WORKDIR /server
 # 开启 Go 国内镜像加速 (使用阿里云镜像更稳定)
 ENV GOPROXY=https://mirrors.aliyun.com/goproxy/,direct

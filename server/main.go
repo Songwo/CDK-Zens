@@ -24,7 +24,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	stateStore, err := store.New(cfg.DataFile, cfg.RedisURL, cfg.RabbitMQURL)
+	stateStore, err := store.NewWithMySQL(cfg.DataFile, cfg.MySQLDSN, cfg.RedisURL, cfg.RabbitMQURL)
 	if err != nil {
 		logger.Error("init store failed", "error", err)
 		os.Exit(1)

@@ -3,6 +3,7 @@ package store
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"database/sql"
 	"encoding/csv"
 	"encoding/hex"
 	"encoding/json"
@@ -33,25 +34,44 @@ type Store struct {
 	path        string
 	mu          sync.RWMutex
 	data        model.SystemData
+	db          *sql.DB
 	redisClient *redis.Client
 	amqpConn    *amqp.Connection
 	amqpChannel *amqp.Channel
 }
 
 func New(path, redisURL, rabbitmqURL string) (*Store, error) {
+	return NewWithMySQL(path, "", redisURL, rabbitmqURL)
+}
+
+func NewWithMySQL(path, mysqlDSN, redisURL, rabbitmqURL string) (*Store, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
 	s := &Store{path: path}
-	content, err := os.ReadFile(path)
-	if err != nil && !os.IsNotExist(err) {
-		return nil, err
+
+	// MySQL mode: connect and load from database
+	if mysqlDSN != "" {
+		db, err := InitMySQL(mysqlDSN)
+		if err != nil {
+			return nil, fmt.Errorf("mysql init: %w", err)
+		}
+		s.db = db
 	}
-	if len(strings.TrimSpace(string(content))) > 0 {
-		if err := json.Unmarshal(content, &s.data); err != nil {
+
+	// JSON fallback: load from file if no MySQL or as seed data
+	if s.db == nil {
+		content, err := os.ReadFile(path)
+		if err != nil && !os.IsNotExist(err) {
 			return nil, err
 		}
+		if len(strings.TrimSpace(string(content))) > 0 {
+			if err := json.Unmarshal(content, &s.data); err != nil {
+				return nil, err
+			}
+		}
 	}
+
 	if redisURL != "" {
 		if opt, err := redis.ParseURL(redisURL); err == nil {
 			s.redisClient = redis.NewClient(opt)
@@ -67,9 +87,15 @@ func New(path, redisURL, rabbitmqURL string) (*Store, error) {
 	}
 	s.mu.Lock()
 	s.migrateLocked()
-	err = s.saveLocked()
+	// Load from MySQL after migration inits all maps
+	if s.db != nil {
+		s.loadFromMySQL()
+	}
+	if s.db == nil {
+		s.saveLocked()
+	}
 	s.mu.Unlock()
-	return s, err
+	return s, nil
 }
 
 func (s *Store) migrateLocked() {
@@ -124,7 +150,7 @@ func (s *Store) migrateLocked() {
 		}
 	}
 	if s.data.CaptchaConfig.Provider == "" {
-		s.data.CaptchaConfig = model.CaptchaConfig{Provider: "hcaptcha", Enabled: false}
+		s.data.CaptchaConfig = model.CaptchaConfig{Provider: "hcaptcha", Enabled: true}
 	}
 	if len(s.data.RiskRules) == 0 {
 		s.addDefaultRiskRulesLocked(now)
@@ -702,10 +728,10 @@ func (s *Store) CreateCampaign(req model.CreateCampaignRequest, actor string) (m
 	defer s.mu.Unlock()
 	projectID := req.ProjectID
 	if projectID == "" {
-		projectID = "default_project"
+		return nil, model.NewAppError(http.StatusBadRequest, "PROJECT_REQUIRED", "必须指定项目")
 	}
 	if s.data.Projects[projectID] == nil {
-		return nil, model.ErrNotFound
+		return nil, model.NewAppError(http.StatusNotFound, "PROJECT_NOT_FOUND", "指定的项目不存在")
 	}
 	now := nowISO()
 	status := model.StatusActive
@@ -1956,6 +1982,10 @@ func (s *Store) GetClaimPageInfo(code, userID, fingerprint string) (*model.Claim
 func (s *Store) SyncStockToRedis(p *model.Project) {}
 
 func (s *Store) saveLocked() error {
+	if s.db != nil {
+		// MySQL mode: sync all data to database
+		return s.syncAllToMySQL()
+	}
 	payload, err := json.MarshalIndent(s.data, "", "  ")
 	if err != nil {
 		return err
@@ -1965,6 +1995,39 @@ func (s *Store) saveLocked() error {
 		return err
 	}
 	return os.Rename(tmp, s.path)
+}
+
+// syncAllToMySQL writes all in-memory data to MySQL.
+// Called on every mutation (same as the old JSON full-write pattern).
+// For better perf, individual dbSave* calls can be used.
+func (s *Store) syncAllToMySQL() error {
+	for _, u := range s.data.Users {
+		s.dbSaveUser(u)
+	}
+	for _, p := range s.data.Projects {
+		s.dbSaveProject(p)
+	}
+	for _, c := range s.data.Campaigns {
+		s.dbSaveCampaign(c)
+	}
+	for _, k := range s.data.CDKs {
+		s.dbSaveCDK(k)
+	}
+	for _, n := range s.data.Nodes {
+		s.dbSaveNode(n)
+	}
+	for _, r := range s.data.ClaimRecords {
+		s.dbSaveClaimRecord(r)
+	}
+	for _, r := range s.data.RiskRules {
+		s.dbSaveRiskRule(r)
+	}
+	for _, b := range s.data.Blacklist {
+		s.dbSaveBlacklist(b)
+	}
+	s.dbSaveSettings(s.data.Settings)
+	s.dbSaveCaptchaConfig(s.data.CaptchaConfig)
+	return nil
 }
 
 func (s *Store) addCDKLocked(campaignID, raw, now string) {
@@ -2220,7 +2283,9 @@ func (s *Store) countRecentClaimsByIPLocked(ip string, seconds int) int {
 }
 func (s *Store) logLocked(typ, level, title, msg, actor, ip, targetType, targetID string, meta map[string]interface{}) {
 	id := MakeRandomString(12)
-	s.data.SystemLogs[id] = &model.SystemLog{ID: id, Type: typ, Level: level, Title: title, Message: msg, Actor: actor, IP: ip, TargetType: targetType, TargetID: targetID, Metadata: meta, CreatedAt: nowISO()}
+	l := &model.SystemLog{ID: id, Type: typ, Level: level, Title: title, Message: msg, Actor: actor, IP: ip, TargetType: targetType, TargetID: targetID, Metadata: meta, CreatedAt: nowISO()}
+	s.data.SystemLogs[id] = l
+	s.dbSaveLog(l)
 }
 
 func legacyCampaignStatus(p *model.Project) string {
