@@ -6,32 +6,32 @@ const NAV_GROUPS = [
   {
     label: "运营",
     id: "ops",
-    minRole: "viewer",
+    minRole: "user",
     items: [
-      { path: "/admin/dashboard", label: "运营总览", icon: "◎", minRole: "viewer" },
-      { path: "/admin/campaigns", label: "活动管理", icon: "▦", minRole: "viewer" },
-      { path: "/admin/cdks", label: "CDK 库存", icon: "◇", minRole: "viewer" },
-      { path: "/admin/nodes", label: "分发网络", icon: "⎈", minRole: "viewer" },
-      { path: "/admin/projects", label: "项目管理", icon: "◫", minRole: "viewer" },
+      { path: "/admin/dashboard", label: "运营总览", icon: "◎", minRole: "user" },
+      { path: "/admin/campaigns", label: "活动管理", icon: "▦", minRole: "user" },
+      { path: "/admin/cdks", label: "CDK 库存", icon: "◇", minRole: "user" },
+      { path: "/admin/nodes", label: "分发网络", icon: "⎈", minRole: "user" },
+      { path: "/admin/projects", label: "项目管理", icon: "◫", minRole: "user" },
     ],
   },
   {
     label: "数据",
     id: "data",
-    minRole: "viewer",
+    minRole: "user",
     items: [
-      { path: "/admin/claims", label: "领取记录", icon: "◷", minRole: "viewer" },
-      { path: "/admin/analytics", label: "数据分析", icon: "↗", minRole: "viewer" },
-      { path: "/admin/logs", label: "系统日志", icon: "☰", minRole: "operator" },
+      { path: "/admin/claims", label: "领取记录", icon: "◷", minRole: "user" },
+      { path: "/admin/analytics", label: "数据分析", icon: "↗", minRole: "user" },
+      { path: "/admin/logs", label: "系统日志", icon: "☰", minRole: "admin" },
     ],
   },
   {
     label: "安全",
     id: "security",
-    minRole: "operator",
+    minRole: "admin",
     items: [
-      { path: "/admin/risk", label: "风控中心", icon: "◈", minRole: "operator" },
-      { path: "/admin/captcha", label: "验证码配置", icon: "▣", minRole: "operator" },
+      { path: "/admin/risk", label: "风控中心", icon: "◈", minRole: "admin" },
+      { path: "/admin/captcha", label: "验证码配置", icon: "▣", minRole: "admin" },
     ],
   },
   {
@@ -44,7 +44,7 @@ const NAV_GROUPS = [
   },
 ];
 
-const ROLE_LEVEL = { viewer: 0, operator: 1, admin: 2 };
+const ROLE_LEVEL = { user: 0, viewer: 1, operator: 2, admin: 3 };
 
 function hasPermission(userRole, minRole) {
   return (ROLE_LEVEL[userRole] || 0) >= (ROLE_LEVEL[minRole] || 0);
@@ -205,7 +205,7 @@ export default function AdminLayout() {
       >
         {/* 品牌区域 */}
         <div className="admin-sidebar__brand">
-          <div className="admin-sidebar__logo">{settings?.logoText || "MB"}</div>
+          <img src="/logo.png" alt="Logo" width="44" height="44" className="admin-sidebar__logo" style={{ objectFit: 'cover', background: 'transparent', boxShadow: 'none' }} />
           {!collapsed && (
             <div className="admin-sidebar__brand-text">
               <h1>{settings?.systemName || "缪盒空投台"}</h1>
@@ -266,12 +266,16 @@ export default function AdminLayout() {
         <div className="admin-sidebar__footer">
           {!collapsed && user && (
             <div className="admin-sidebar__user">
-              <div className="admin-sidebar__avatar">
-                {(user.username || user.user?.username || "U").charAt(0).toUpperCase()}
-              </div>
+              {user.avatar || user.user?.avatar ? (
+                <img src={user.avatar || user.user?.avatar} alt="Avatar" className="admin-sidebar__avatar" style={{ objectFit: 'cover', background: 'transparent', padding: 0 }} />
+              ) : (
+                <div className="admin-sidebar__avatar">
+                  {(user.username || user.user?.username || "U").charAt(0).toUpperCase()}
+                </div>
+              )}
               <div className="admin-sidebar__user-info">
                 <strong>{user.username || user.user?.username || "管理员"}</strong>
-                <small>{userRole === "admin" ? "管理员" : userRole === "operator" ? "运营" : "观察者"}</small>
+                <small>{userRole === "admin" ? "管理员" : "用户"}</small>
               </div>
             </div>
           )}
@@ -338,9 +342,13 @@ export default function AdminLayout() {
             </button>
 
             <div className="admin-topbar__user-mobile">
-              <div className="admin-topbar__avatar">
-                {(user?.username || user?.user?.username || "U").charAt(0).toUpperCase()}
-              </div>
+              {user?.avatar || user?.user?.avatar ? (
+                <img src={user?.avatar || user?.user?.avatar} alt="Avatar" className="admin-topbar__avatar" style={{ objectFit: 'cover', background: 'transparent', padding: 0 }} />
+              ) : (
+                <div className="admin-topbar__avatar">
+                  {(user?.username || user?.user?.username || "U").charAt(0).toUpperCase()}
+                </div>
+              )}
             </div>
           </div>
         </header>

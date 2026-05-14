@@ -50,38 +50,41 @@ func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminHealth(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	if !h.requireAdminRole(w, r) {
 		return
 	}
 	writeJSON(w, http.StatusOK, h.store.Health())
 }
 
 func (h *Handler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	writeJSON(w, http.StatusOK, h.store.Dashboard())
+	writeJSON(w, http.StatusOK, h.store.DashboardForUser(user))
 }
 
 func (h *Handler) AdminProjectsRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	actor, _ := h.parseJWTUser(r)
 	if r.URL.Path != "/api/admin/projects" {
 		h.AdminProjectDetailRouter(w, r)
 		return
 	}
 	switch r.Method {
 	case http.MethodGet:
-		writeJSON(w, http.StatusOK, h.store.ListProjectsPage(queryMap(r)))
+		writeJSON(w, http.StatusOK, h.store.ListProjectsPageForUser(queryMap(r), user))
 	case http.MethodPost:
 		var req model.CreateProjectRequest
 		if err := decodeJSON(r, &req); err != nil {
 			writeError(w, err)
 			return
 		}
-		res, err := h.store.CreateProject(req, actor)
+		res, err := h.store.CreateProject(req, user.ID)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -93,10 +96,12 @@ func (h *Handler) AdminProjectsRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminProjectDetailRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	actor, _ := h.parseJWTUser(r)
+	actor := user.ID
 	id, action := parseResourcePath(r.URL.Path, "/api/admin/projects/")
 	if id == "" {
 		writeError(w, model.ErrBadRequest)
@@ -145,10 +150,12 @@ func (h *Handler) AdminProjectDetailRouter(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *Handler) AdminCampaignsRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	actor, _ := h.parseJWTUser(r)
+	actor := user.ID
 	if r.URL.Path != "/api/admin/campaigns" {
 		h.AdminCampaignDetailRouter(w, r)
 		return
@@ -170,10 +177,12 @@ func (h *Handler) AdminCampaignsRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminCampaignDetailRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	actor, _ := h.parseJWTUser(r)
+	actor := user.ID
 	id, action := parseResourcePath(r.URL.Path, "/api/admin/campaigns/")
 	if id == "" {
 		writeError(w, model.ErrBadRequest)
@@ -231,7 +240,9 @@ func (h *Handler) AdminCampaignDetailRouter(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *Handler) AdminCDKsRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
 	if r.URL.Path != "/api/admin/cdks" {
@@ -246,10 +257,12 @@ func (h *Handler) AdminCDKsRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminCDKDetailRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	actor, _ := h.parseJWTUser(r)
+	actor := user.ID
 	rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/api/admin/cdks/"), "/")
 	switch {
 	case rest == "import" && r.Method == http.MethodPost:
@@ -299,10 +312,12 @@ func (h *Handler) AdminCDKDetailRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminNodesRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	actor, _ := h.parseJWTUser(r)
+	actor := user.ID
 	if r.URL.Path != "/api/admin/nodes" {
 		h.AdminNodeDetailRouter(w, r)
 		return
@@ -324,10 +339,12 @@ func (h *Handler) AdminNodesRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminNodeDetailRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	actor, _ := h.parseJWTUser(r)
+	actor := user.ID
 	rest := strings.Trim(strings.TrimPrefix(r.URL.Path, "/api/admin/nodes/"), "/")
 	switch {
 	case rest == "batch-enable-captcha" && r.Method == http.MethodPost:
@@ -390,9 +407,14 @@ func (h *Handler) PublicClaimRouter(w http.ResponseWriter, r *http.Request) {
 		respond(w, res, err)
 		return
 	}
+	// 强制登录才能领取
+	userID, _ := h.parseJWTUser(r)
+	if userID == "" {
+		writeError(w, model.ErrLoginRequired)
+		return
+	}
 	switch r.Method {
 	case http.MethodGet:
-		userID, _ := h.parseJWTUser(r)
 		res, err := h.store.GetPublicNodeClaim(slug, userID, r.URL.Query().Get("fingerprint"))
 		respond(w, res, err)
 	case http.MethodPost:
@@ -419,7 +441,6 @@ func (h *Handler) PublicClaimRouter(w http.ResponseWriter, r *http.Request) {
 			}
 			captchaPassed = true
 		}
-		userID, _ := h.parseJWTUser(r)
 		res, err := h.store.ClaimNodeReward(slug, userID, req.Fingerprint, clientIP(r), r.UserAgent(), captchaPassed)
 		respond(w, res, err)
 	default:
@@ -428,6 +449,12 @@ func (h *Handler) PublicClaimRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ClaimRouter(w http.ResponseWriter, r *http.Request) {
+	// 强制登录才能领取
+	userID, _ := h.parseJWTUser(r)
+	if userID == "" {
+		writeError(w, model.ErrLoginRequired)
+		return
+	}
 	code := r.URL.Query().Get("code")
 	if code == "" {
 		writeError(w, model.NewAppError(http.StatusBadRequest, "MISSING_CODE", "缺少项目代码"))
@@ -438,10 +465,12 @@ func (h *Handler) ClaimRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminClaimsRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	actor, _ := h.parseJWTUser(r)
+	actor := user.ID
 	if r.URL.Path == "/api/admin/claims" && r.Method == http.MethodGet {
 		writeJSON(w, http.StatusOK, h.store.ListClaims(queryMap(r)))
 		return
@@ -464,7 +493,9 @@ func (h *Handler) AdminClaimsRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminAnalyticsRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
 	data := h.store.Analytics(queryMap(r))
@@ -488,7 +519,7 @@ func (h *Handler) AdminAnalyticsRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminLogsRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	if !h.requireAdminRole(w, r) {
 		return
 	}
 	if r.URL.Path == "/api/admin/logs" && r.Method == http.MethodGet {
@@ -524,7 +555,7 @@ func (h *Handler) AdminLogsRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminRiskRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	if !h.requireAdminRole(w, r) {
 		return
 	}
 	actor, _ := h.parseJWTUser(r)
@@ -610,7 +641,7 @@ func (h *Handler) AdminRiskRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminCaptchaRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	if !h.requireAdminRole(w, r) {
 		return
 	}
 	actor, _ := h.parseJWTUser(r)
@@ -656,7 +687,7 @@ func (h *Handler) AdminCaptchaRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminSettingsRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	if !h.requireAdminRole(w, r) {
 		return
 	}
 	actor, _ := h.parseJWTUser(r)
@@ -677,7 +708,7 @@ func (h *Handler) AdminSettingsRouter(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AdminSystemRouter(w http.ResponseWriter, r *http.Request) {
-	if !h.requireAdmin(w, r) {
+	if !h.requireAdminRole(w, r) {
 		return
 	}
 	actor, _ := h.parseJWTUser(r)
@@ -773,41 +804,13 @@ type LoginRequest struct {
 }
 
 func (h *Handler) AuthLogin(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		writeError(w, methodErr())
-		return
-	}
-	var req LoginRequest
-	if err := decodeJSON(r, &req); err != nil {
-		writeError(w, err)
-		return
-	}
-	user := h.store.FindUserByUsername(req.Username)
-	if user == nil || user.Password != req.Password {
-		writeError(w, model.NewAppError(http.StatusUnauthorized, "INVALID_CREDENTIALS", "用户名或密码错误"))
-		return
-	}
-	token, _ := h.generateJWT(user.ID, user.Username)
-	writeJSON(w, http.StatusOK, map[string]string{"token": token})
+	// 本地登录已禁用，仅支持社区 SSO 登录
+	writeError(w, model.NewAppError(http.StatusForbidden, "LOCAL_LOGIN_DISABLED", "本地登录已禁用，请使用社区账号登录"))
 }
 
 func (h *Handler) AuthRegister(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		writeError(w, methodErr())
-		return
-	}
-	var req LoginRequest
-	if err := decodeJSON(r, &req); err != nil {
-		writeError(w, err)
-		return
-	}
-	user, err := h.store.CreateUser(req.Username, req.Password)
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	token, _ := h.generateJWT(user.ID, user.Username)
-	writeJSON(w, http.StatusOK, map[string]string{"token": token})
+	// 本地注册已禁用，仅支持社区 SSO 登录
+	writeError(w, model.NewAppError(http.StatusForbidden, "LOCAL_REGISTER_DISABLED", "本地注册已禁用，请使用社区账号登录"))
 }
 
 func (h *Handler) AuthCommunityShortcut(w http.ResponseWriter, r *http.Request) {
@@ -867,7 +870,21 @@ func (h *Handler) AuthCommunityLogin(w http.ResponseWriter, r *http.Request) {
 	nickname, _ := claims["nickname"].(string)
 	avatar, _ := claims["avatar"].(string)
 	email, _ := claims["email"].(string)
-	role := "admin"
+
+	// 根据社区角色映射 CDK 角色
+	role := "user"
+	if rolesRaw, ok := claims["roles"]; ok {
+		if rolesArr, ok := rolesRaw.([]interface{}); ok {
+			for _, r := range rolesArr {
+				if rs, ok := r.(string); ok {
+					if rs == "ROLE_ADMIN" || rs == "ROLE_SUPER_ADMIN" {
+						role = "admin"
+						break
+					}
+				}
+			}
+		}
+	}
 
 	if communityUserID == "" || username == "" {
 		writeError(w, model.NewAppError(http.StatusUnauthorized, "INCOMPLETE_CLAIMS", "Token 中缺少用户信息"))
@@ -929,10 +946,30 @@ func (h *Handler) parseJWTUser(r *http.Request) (string, string) {
 	return sub, name
 }
 
-func (h *Handler) requireAdmin(w http.ResponseWriter, r *http.Request) bool {
+// getAuthUser returns the full user object from JWT, or nil if not logged in.
+func (h *Handler) getAuthUser(r *http.Request) *model.User {
 	userID, _ := h.parseJWTUser(r)
 	if userID == "" {
-		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录后台"))
+		return nil
+	}
+	u := h.store.FindUserByID(userID)
+	if u != nil {
+		return u
+	}
+	// fallback for legacy users - create a minimal user object
+	_, username := h.parseJWTUser(r)
+	return &model.User{ID: userID, Username: username, Role: "admin"}
+}
+
+// requireAdminRole checks that the user is logged in AND has admin role.
+func (h *Handler) requireAdminRole(w http.ResponseWriter, r *http.Request) bool {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
+		return false
+	}
+	if user.Role != "admin" {
+		writeError(w, model.NewAppError(http.StatusForbidden, "FORBIDDEN", "仅管理员可访问此功能"))
 		return false
 	}
 	return true

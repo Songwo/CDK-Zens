@@ -3,7 +3,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import ClaimPage from "./pages/ClaimPage";
 import LoginPage from "./pages/LoginPage";
 import LoginCallbackPage from "./pages/LoginCallbackPage";
-import RegisterPage from "./pages/RegisterPage";
+
 import DashboardPage from "./pages/admin/DashboardPage";
 import ProjectListPage from "./pages/admin/ProjectListPage";
 import ProjectCreatePage from "./pages/admin/ProjectCreatePage";
@@ -20,7 +20,7 @@ export default function App() {
       {/* 登录页 */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/login/callback" element={<LoginCallbackPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+
 
       {/* 管理后台 */}
       <Route path="/admin" element={<AdminLayout />}>

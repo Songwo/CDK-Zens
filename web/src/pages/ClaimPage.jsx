@@ -183,7 +183,7 @@ export default function ClaimPage() {
     if (project.status === "upcoming" || project.status === "draft") return { disabled: true, text: "尚未激活" };
     if (project.status === "ended") return { disabled: true, text: "已过生命周期" };
     if (project.status === "soldout" || project.status === "exhausted" || project.remaining <= 0) return { disabled: true, text: "资源已耗尽" };
-    if (project.needLogin && !isLoggedIn()) return { disabled: true, text: "需要身份验证" };
+    if (!isLoggedIn()) return { disabled: true, text: "需要身份验证" };
     if (project.requireCaptcha && !hcaptchaToken) return { disabled: true, text: "请先完成人机验证" };
     if (claiming) return { disabled: true, text: "正在领取..." };
     return { disabled: false, text: "接入并领取" };
@@ -238,7 +238,7 @@ export default function ClaimPage() {
 
       {/* 顶部品牌标识 */}
       <header className="claim-brand anim-fade-up">
-        <div className="claim-brand__logo">{brand.logoText}</div>
+        <img src="/logo.png" alt="Logo" width="48" height="48" className="claim-brand__logo" style={{ objectFit: 'cover', background: 'transparent', boxShadow: 'none' }} />
         <div>
           <h1>{brand.systemName}</h1>
           <span>{brand.brandEnglishName}</span>
@@ -343,10 +343,10 @@ export default function ClaimPage() {
           )}
         </div>
 
-        {/* 登录提示 */}
-        {project.needLogin && !isLoggedIn() && !claimResult && (
+        {/* 登录提示 - 所有用户必须登录 */}
+        {!isLoggedIn() && !claimResult && (
           <div className="claim-login-hint" style={{marginTop: '16px', padding: '16px 0 0', textAlign: 'center', borderTop: '1px solid var(--cp-divider)', flexShrink: 0}}>
-            <p style={{margin: 0, display: 'inline-block', color: 'var(--cp-muted)'}}>此通道需要经过身份断言才能接入</p>
+            <p style={{margin: 0, display: 'inline-block', color: 'var(--cp-muted)'}}>此通道需要经过身份验证才能接入</p>
             <a href={`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`} className="btn btn--text" style={{padding: '0 12px', color: 'var(--cp-brand)', fontWeight: 700}}>
               前往验证身份 →
             </a>

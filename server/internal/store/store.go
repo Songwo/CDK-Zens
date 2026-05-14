@@ -373,13 +373,39 @@ func (s *Store) CreateOrUpdateCommunityUser(communityUserID, username, avatar, n
 func (s *Store) Dashboard() map[string]interface{} {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	stats := map[string]interface{}{"activeCampaigns": 0, "totalCampaigns": len(s.data.Campaigns), "totalStock": 0, "claimedCount": 0, "remainingCount": 0, "todayClaims": 0, "totalNodes": len(s.data.Nodes), "abnormalNodes": 0, "successRate": 0.0, "failedClaims": 0}
+	return s.dashboardLocked(nil)
+}
+
+// DashboardForUser returns dashboard data scoped to the user's projects.
+// Admin users see all data; regular users see only their own projects.
+func (s *Store) DashboardForUser(user *model.User) map[string]interface{} {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if user.Role == "admin" {
+		return s.dashboardLocked(nil)
+	}
+	// Build set of project IDs owned by this user
+	ownedProjects := map[string]bool{}
+	for _, p := range s.data.Projects {
+		if p.CreatorID == user.ID {
+			ownedProjects[p.ID] = true
+		}
+	}
+	return s.dashboardLocked(ownedProjects)
+}
+
+func (s *Store) dashboardLocked(scopeProjectIDs map[string]bool) map[string]interface{} {
+	stats := map[string]interface{}{"activeCampaigns": 0, "totalCampaigns": 0, "totalStock": 0, "claimedCount": 0, "remainingCount": 0, "todayClaims": 0, "totalNodes": 0, "abnormalNodes": 0, "successRate": 0.0, "failedClaims": 0}
 	campaigns := []map[string]interface{}{}
 	nodes := []map[string]interface{}{}
 	claims := []model.ClaimRecord{}
 	alerts := []map[string]string{}
 	for _, c := range s.data.Campaigns {
+		if scopeProjectIDs != nil && !scopeProjectIDs[c.ProjectID] {
+			continue
+		}
 		cc := s.campaignViewLocked(c)
+		stats["totalCampaigns"] = stats["totalCampaigns"].(int) + 1
 		if cc["status"] == model.StatusActive {
 			stats["activeCampaigns"] = stats["activeCampaigns"].(int) + 1
 		}
@@ -392,12 +418,19 @@ func (s *Store) Dashboard() map[string]interface{} {
 		}
 	}
 	for _, n := range s.data.Nodes {
+		if scopeProjectIDs != nil && !scopeProjectIDs[n.ProjectID] {
+			continue
+		}
+		stats["totalNodes"] = stats["totalNodes"].(int) + 1
 		nodes = append(nodes, s.nodeViewLocked(n))
 		if n.Status != model.StatusActive {
 			stats["abnormalNodes"] = stats["abnormalNodes"].(int) + 1
 		}
 	}
 	for _, r := range s.data.ClaimRecords {
+		if scopeProjectIDs != nil && !scopeProjectIDs[r.ProjectID] {
+			continue
+		}
 		claims = append(claims, *r)
 		if isToday(r.CreatedAt) && r.Status == model.StatusSuccess {
 			stats["todayClaims"] = stats["todayClaims"].(int) + 1
@@ -448,7 +481,32 @@ func (s *Store) ListProjectsPage(q map[string]string) model.PageResult {
 		if kw != "" && !containsAny(kw, p.Name, p.Description, p.ID) {
 			continue
 		}
-		rows = append(rows, map[string]interface{}{"id": p.ID, "name": p.Name, "description": p.Description, "status": p.Status, "campaignIds": p.CampaignIDs, "nodeIds": p.NodeIDs, "campaignCount": len(p.CampaignIDs), "nodeCount": len(p.NodeIDs), "createdAt": p.CreatedAt, "updatedAt": p.UpdatedAt})
+		rows = append(rows, map[string]interface{}{"id": p.ID, "name": p.Name, "description": p.Description, "status": p.Status, "campaignIds": p.CampaignIDs, "nodeIds": p.NodeIDs, "campaignCount": len(p.CampaignIDs), "nodeCount": len(p.NodeIDs), "createdAt": p.CreatedAt, "updatedAt": p.UpdatedAt, "creatorId": p.CreatorID})
+	}
+	return paginateMaps(rows, q)
+}
+
+// ListProjectsPageForUser returns projects scoped to the user.
+// Admin users see all projects; regular users see only their own.
+func (s *Store) ListProjectsPageForUser(q map[string]string, user *model.User) model.PageResult {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	rows := []map[string]interface{}{}
+	kw := strings.ToLower(q["keyword"])
+	for _, p := range s.data.Projects {
+		// Regular users can only see their own projects
+		if user.Role != "admin" && p.CreatorID != user.ID {
+			continue
+		}
+		if p.ID == "default_project" && len(s.data.Projects) > 1 && kw == "" && q["status"] == "" { /* still show default */
+		}
+		if q["status"] != "" && q["status"] != "all" && p.Status != q["status"] {
+			continue
+		}
+		if kw != "" && !containsAny(kw, p.Name, p.Description, p.ID) {
+			continue
+		}
+		rows = append(rows, map[string]interface{}{"id": p.ID, "name": p.Name, "description": p.Description, "status": p.Status, "campaignIds": p.CampaignIDs, "nodeIds": p.NodeIDs, "campaignCount": len(p.CampaignIDs), "nodeCount": len(p.NodeIDs), "createdAt": p.CreatedAt, "updatedAt": p.UpdatedAt, "creatorId": p.CreatorID})
 	}
 	return paginateMaps(rows, q)
 }
@@ -460,7 +518,7 @@ func (s *Store) CreateProject(req model.CreateProjectRequest, actor string) (*mo
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	now := nowISO()
-	p := &model.Project{ID: MakeRandomString(12), Name: strings.TrimSpace(req.Name), Description: req.Description, Status: model.StatusActive, CampaignIDs: []string{}, NodeIDs: []string{}, CreatedAt: now, UpdatedAt: now}
+	p := &model.Project{ID: MakeRandomString(12), Name: strings.TrimSpace(req.Name), Description: req.Description, Status: model.StatusActive, CampaignIDs: []string{}, NodeIDs: []string{}, CreatedAt: now, UpdatedAt: now, CreatorID: actor}
 	s.data.Projects[p.ID] = p
 	s.logLocked("operation", "info", "创建项目", "创建项目 "+p.Name, actor, "", "project", p.ID, nil)
 	return p, s.saveLocked()
