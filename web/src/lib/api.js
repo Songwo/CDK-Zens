@@ -36,7 +36,7 @@ async function request(path, options = {}) {
     const err = new Error(msg);
     err.code = payload?.code || payload?.error?.code || "UNKNOWN";
     err.status = response.status;
-    if (response.status === 401 && window.location.pathname !== "/login") {
+    if (response.status === 401 && !window.location.pathname.startsWith("/login")) {
       clearAuthToken();
       window.location.href = `/login?returnUrl=${encodeURIComponent(window.location.pathname)}`;
     }
