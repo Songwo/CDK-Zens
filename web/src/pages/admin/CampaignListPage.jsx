@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { adminApi } from "../../lib/api";
-import { ConfirmDialog, DataTable, Modal, PageHeader, ProgressBar, StatusBadge, Toast } from "../../components/ui";
+import CampaignCreateModal from "../../components/CampaignCreateModal";
+import CdkImportModal from "../../components/CdkImportModal";
+import { notifyOnboardingRefresh } from "../../components/DistributionGuide";
+import { ConfirmDialog, DataTable, EmptyState, FilterSelect, PageHeader, ProgressBar, SearchInput, StatusBadge, Toast } from "../../components/ui";
 
-const EMPTY_FORM = { name: "", description: "", startTime: "", endTime: "", enabled: true, perUserLimit: 1, rewardListText: "" };
-
-function toISO(value) {
-  return value ? new Date(value).toISOString() : "";
-}
+function items(res) { return res?.items || res || []; }
 
 function formatTime(iso) {
   if (!iso) return "--";
@@ -17,79 +16,88 @@ function formatTime(iso) {
 
 export default function CampaignListPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [projectsLoading, setProjectsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
-  const [form, setForm] = useState(null);
+  const [projectId, setProjectId] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [defaultProjectId, setDefaultProjectId] = useState("");
+  const [lockedProjectId, setLockedProjectId] = useState("");
   const [importTarget, setImportTarget] = useState(null);
-  const [importText, setImportText] = useState("");
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
-  const mode = location.pathname.endsWith("/create") ? "create" : location.pathname.endsWith("/rules") ? "rules" : location.pathname.endsWith("/archive") ? "archive" : "list";
+  const mode = location.pathname.endsWith("/rules") ? "rules" : location.pathname.endsWith("/archive") ? "archive" : "list";
 
-  async function reload() {
+  async function reloadProjects() {
+    setProjectsLoading(true);
+    try {
+      setProjects(items(await adminApi.listProjects({ pageSize: 500 })));
+    } catch (err) {
+      setToast({ type: "error", message: err.message });
+    } finally {
+      setProjectsLoading(false);
+    }
+  }
+
+  async function reloadCampaigns() {
     setLoading(true);
     try {
-      const res = await adminApi.listCampaigns();
-      setCampaigns(res.items || res || []);
-    } finally { setLoading(false); }
+      setCampaigns(items(await adminApi.listCampaigns({ keyword: search, status, projectId, pageSize: 500 })));
+    } catch (err) {
+      setToast({ type: "error", message: err.message });
+    } finally {
+      setLoading(false);
+    }
   }
 
-  useEffect(() => { reload(); }, []);
+  useEffect(() => { reloadProjects(); }, []);
+  useEffect(() => { reloadCampaigns(); }, [search, status, projectId]);
 
   useEffect(() => {
-    if (location.pathname.endsWith("/create")) setForm(EMPTY_FORM);
-    if (location.pathname.endsWith("/archive")) setStatus("all");
-  }, [location.pathname]);
+    const params = new URLSearchParams(location.search);
+    const open = params.get("open") === "create" || location.pathname.endsWith("/create");
+    if (!open) return;
+    const routeProjectId = params.get("projectId") || "";
+    setDefaultProjectId(routeProjectId);
+    setLockedProjectId(routeProjectId);
+    setCreateOpen(true);
+  }, [location.pathname, location.search]);
 
   const rows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return campaigns.filter((c) => {
-      if (mode === "archive" && !["ended", "exhausted", "paused"].includes(c.status)) return false;
-      if (status !== "all" && c.status !== status) return false;
-      if (!q) return true;
-      return [c.name, c.projectCode, c.claimUrl].some((v) => String(v || "").toLowerCase().includes(q));
-    });
-  }, [campaigns, search, status]);
+    if (mode !== "archive") return campaigns;
+    return campaigns.filter((c) => ["ended", "exhausted", "paused", "disabled"].includes(c.status));
+  }, [campaigns, mode]);
 
-  async function createCampaign(e) {
-    e.preventDefault();
-    if (!form.name.trim()) return setToast({ type: "error", message: "活动名称不能为空" });
-    const items = form.rewardListText.split(/\r?\n|,|;|，|；/).map((v) => v.trim()).filter(Boolean);
-    if (items.length === 0) return setToast({ type: "error", message: "CDK 不能为空" });
-    try {
-      await adminApi.createCampaign({
-        name: form.name.trim(),
-        description: form.description,
-        startAt: toISO(form.startTime),
-        endAt: toISO(form.endTime),
-        rewardType: "cdk_list",
-        rewardList: items,
-        enabled: form.enabled,
-        perUserLimit: Number(form.perUserLimit) || 1,
-      });
-      setForm(null);
-      setToast({ message: "活动创建成功" });
-      reload();
-    } catch (err) {
-      setToast({ type: "error", message: err.message });
+  function openCreate(project = null) {
+    setDefaultProjectId(project?.id || projectId || "");
+    setLockedProjectId("");
+    setCreateOpen(true);
+  }
+
+  async function handleCreated() {
+    setCreateOpen(false);
+    setToast({ message: "活动创建成功" });
+    await reloadCampaigns();
+    notifyOnboardingRefresh();
+    const returnTo = new URLSearchParams(location.search).get("returnTo");
+    if (returnTo) {
+      navigate(returnTo, { replace: true });
+      return;
+    }
+    if (location.pathname.endsWith("/create") || location.search) {
+      navigate("/admin/campaigns", { replace: true });
     }
   }
 
-  async function importCDK(e) {
-    e.preventDefault();
-    const items = importText.split(/\r?\n|,|;|，|；/).map((v) => v.trim()).filter(Boolean);
-    if (!items.length) return setToast({ type: "error", message: "CDK 不能为空" });
-    try {
-      const res = await adminApi.importCampaignCDKs(importTarget.id, items);
-      setToast({ message: `导入 ${res.imported} 条，重复 ${res.duplicates} 条，无效 ${res.invalid} 条` });
-      setImportTarget(null);
-      setImportText("");
-      reload();
-    } catch (err) {
-      setToast({ type: "error", message: err.message });
-    }
+  async function handleImported(res, campaign) {
+    setImportTarget(null);
+    setToast({ message: `成功导入 ${res.imported || res.successCount || 0} 个 CDK 到活动【${campaign?.name || "未知活动"}】` });
+    await reloadCampaigns();
+    notifyOnboardingRefresh();
   }
 
   async function runAction(action, item) {
@@ -99,7 +107,8 @@ export default function CampaignListPage() {
       if (action === "end") await adminApi.endCampaign(item.id);
       if (action === "delete") await adminApi.deleteCampaign(item.id);
       setToast({ message: "操作成功" });
-      reload();
+      await reloadCampaigns();
+      notifyOnboardingRefresh();
     } catch (err) {
       setToast({ type: "error", message: err.message });
     } finally {
@@ -112,16 +121,24 @@ export default function CampaignListPage() {
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
       <PageHeader
         eyebrow="Campaigns"
-        title={mode === "create" ? "新建活动" : mode === "rules" ? "领取规则" : mode === "archive" ? "归档活动" : "活动列表"}
+        title={mode === "rules" ? "领取规则" : mode === "archive" ? "归档活动" : "活动列表"}
         description={mode === "rules" ? "集中查看活动的重复领取、IP、设备和验证码策略。" : mode === "archive" ? "查看已结束、库存耗尽或已暂停的历史活动。" : "管理 CDK 活动、库存、状态和领取记录。"}
-        actions={<button className="btn btn--primary" onClick={() => setForm(EMPTY_FORM)}>新建活动</button>}
+        actions={<button className="btn btn--primary" onClick={() => openCreate()}>新建活动</button>}
       />
+
+      {!projectsLoading && projects.length === 0 && (
+        <EmptyState
+          title="你还没有项目。请先创建项目，用来归类活动和分发节点。"
+          action={<button className="btn btn--primary" onClick={() => navigate(`/admin/projects?open=create&returnTo=${encodeURIComponent("/admin/campaigns?open=create")}`)}>创建项目</button>}
+        />
+      )}
 
       {mode === "rules" && (
         <section className="panel">
           <div className="panel__header"><div><h2>规则总览</h2><p>这些字段会在公开领取接口中参与校验或展示。</p></div></div>
-          <DataTable rows={campaigns} pageSize={8} columns={[
+          <DataTable rows={campaigns} pageSize={8} emptyText="暂无活动。创建活动后才能配置领取规则。" columns={[
             { key: "name", title: "活动" },
+            { key: "projectName", title: "所属项目" },
             { key: "allowRepeat", title: "允许重复", render: (r) => r.allowRepeat ? "允许" : "不允许" },
             { key: "perUserLimit", title: "单用户限制" },
             { key: "perIPLimit", title: "单 IP 限制", render: (r) => r.perIPLimit || "默认" },
@@ -132,15 +149,20 @@ export default function CampaignListPage() {
       )}
 
       <div className="toolbar panel-toolbar">
-        <select className="styled-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="all">全部状态</option><option value="active">进行中</option><option value="disabled">已暂停</option><option value="upcoming">未开始</option><option value="ended">已结束</option><option value="soldout">库存耗尽</option>
-        </select>
-        <input className="search-input" placeholder="搜索活动名称、ID、短链接" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <FilterSelect value={projectId} onChange={setProjectId}>
+          <option value="">全部项目</option>
+          {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+        </FilterSelect>
+        <FilterSelect value={status} onChange={setStatus}>
+          <option value="all">全部状态</option><option value="active">进行中</option><option value="disabled">已暂停</option><option value="paused">已暂停</option><option value="draft">未开始</option><option value="ended">已结束</option><option value="exhausted">库存耗尽</option>
+        </FilterSelect>
+        <SearchInput value={search} onChange={setSearch} placeholder="搜索活动名称、活动 ID、项目名称、短链接" />
       </div>
 
       <section className="panel">
-        <DataTable loading={loading} rows={rows} pageSize={10} columns={[
+        <DataTable loading={loading} rows={rows} pageSize={10} emptyText="暂无活动。创建活动后才能导入 CDK 并生成领取链接。" columns={[
           { key: "name", title: "活动", render: (r) => <><strong>{r.name}</strong><small>{r.id}<br />{r.projectCode}</small></> },
+          { key: "projectName", title: "所属项目", render: (r) => r.projectName || "--" },
           { key: "status", title: "状态", render: (r) => <StatusBadge status={r.status} /> },
           { key: "stock", title: "库存进度", render: (r) => <ProgressBar claimed={r.claimedCount} total={r.totalStock} remaining={r.remaining} /> },
           { key: "time", title: "时间范围", render: (r) => <span>{formatTime(r.startTime)}<br /><small>{formatTime(r.endTime)}</small></span> },
@@ -154,28 +176,29 @@ export default function CampaignListPage() {
         ]} />
       </section>
 
-      {form && (
-        <Modal open={!!form} title="新建活动" onCancel={() => setForm(null)}>
-        <form className="modal-form" onSubmit={createCampaign}>
-          <input className="styled-input" placeholder="活动名称" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <textarea className="styled-textarea" placeholder="活动描述" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-          <div className="form-row-2"><input className="styled-input" type="datetime-local" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} /><input className="styled-input" type="datetime-local" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} /></div>
-          <input className="styled-input" type="number" min="1" value={form.perUserLimit} onChange={(e) => setForm({ ...form, perUserLimit: e.target.value })} />
-          <textarea className="styled-textarea mono" rows="7" placeholder="每行一个 CDK" value={form.rewardListText} onChange={(e) => setForm({ ...form, rewardListText: e.target.value })} />
-          <label className="switch-label"><input type="checkbox" checked={form.enabled} onChange={(e) => setForm({ ...form, enabled: e.target.checked })} />启用活动</label>
-          <div className="modal-footer"><button type="button" className="modal-btn modal-btn--cancel" onClick={() => setForm(null)}>取消</button><button className="modal-btn modal-btn--primary">创建</button></div>
-        </form>
-        </Modal>
-      )}
+      <CampaignCreateModal
+        open={createOpen}
+        projects={projects}
+        projectsLoading={projectsLoading}
+        defaultProjectId={defaultProjectId}
+        lockedProjectId={lockedProjectId}
+        onCancel={() => setCreateOpen(false)}
+        onCreateProject={() => navigate(`/admin/projects?open=create&returnTo=${encodeURIComponent("/admin/campaigns?open=create")}`)}
+        onSuccess={handleCreated}
+        onError={(message) => setToast({ type: "error", message })}
+      />
 
-      {importTarget && (
-        <Modal open={!!importTarget} title={`导入 CDK：${importTarget.name}`} onCancel={() => setImportTarget(null)}>
-        <form className="modal-form" onSubmit={importCDK}>
-          <textarea className="styled-textarea mono" rows="10" placeholder="每行一个 CDK，系统会自动去重" value={importText} onChange={(e) => setImportText(e.target.value)} />
-          <div className="modal-footer"><button type="button" className="modal-btn modal-btn--cancel" onClick={() => setImportTarget(null)}>取消</button><button className="modal-btn modal-btn--primary">导入</button></div>
-        </form>
-        </Modal>
-      )}
+      <CdkImportModal
+        open={!!importTarget}
+        projects={projects}
+        campaigns={campaigns}
+        initialProjectId={importTarget?.projectId}
+        initialCampaignId={importTarget?.id}
+        onCancel={() => setImportTarget(null)}
+        onCreateProject={() => navigate(`/admin/projects?open=create&returnTo=${encodeURIComponent("/admin/campaigns?open=create")}`)}
+        onSuccess={handleImported}
+        onError={(message) => setToast({ type: "error", message })}
+      />
 
       <ConfirmDialog
         open={!!confirm}

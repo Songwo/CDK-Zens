@@ -89,6 +89,7 @@ export default function ProjectDetailPage() {
             <span className="page-hero__subtitle" style={{color: 'var(--cp-muted)'}}>Node ID: {project.projectCode}</span>
           </div>
           <div className="btn-group">
+            <button className="btn btn--primary" onClick={() => navigate(`/admin/campaigns?open=create&projectId=${project.id}`)}>创建活动</button>
             <button className="btn btn--secondary" onClick={copyLink} title="复制该项目的公开领取链接，发送给用户即可领取">{copyOk ? "✓ 已复制" : "复制领取链接"}</button>
             {project.enabled && <button className="btn btn--secondary" style={{color: '#dc2626', borderColor: '#fee2e2'}} onClick={handleDisable} title="停用该项目，停用后用户将无法继续领取">停用项目</button>}
           </div>

@@ -19,11 +19,11 @@ import (
 )
 
 type Handler struct {
-	store              *store.Store
-	logger             *slog.Logger
-	hcaptcha           hcaptcha.Verifier
-	communityURL       string
-	communityClientID  string
+	store             *store.Store
+	logger            *slog.Logger
+	hcaptcha          hcaptcha.Verifier
+	communityURL      string
+	communityClientID string
 }
 
 func New(store *store.Store, logger *slog.Logger) *Handler {
@@ -63,6 +63,19 @@ func (h *Handler) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, h.store.DashboardForUser(user))
+}
+
+func (h *Handler) AdminOnboardingStatus(w http.ResponseWriter, r *http.Request) {
+	user := h.getAuthUser(r)
+	if user == nil {
+		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
+		return
+	}
+	if r.Method != http.MethodGet {
+		writeError(w, methodErr())
+		return
+	}
+	writeJSON(w, http.StatusOK, h.store.OnboardingStatusForUser(user))
 }
 
 func (h *Handler) AdminProjectsRouter(w http.ResponseWriter, r *http.Request) {
@@ -232,7 +245,7 @@ func (h *Handler) AdminCampaignDetailRouter(w http.ResponseWriter, r *http.Reque
 		if len(codes) == 0 {
 			codes = req.Items
 		}
-		res, err := h.store.ImportCDKs(id, codes, actor)
+		res, err := h.store.ImportCDKsForProject(firstNonEmpty(req.ProjectID, req.ProjectIDSnake), id, codes, actor)
 		respond(w, res, err)
 	default:
 		writeError(w, methodErr())
@@ -275,7 +288,7 @@ func (h *Handler) AdminCDKDetailRouter(w http.ResponseWriter, r *http.Request) {
 		if len(codes) == 0 {
 			codes = req.Items
 		}
-		res, err := h.store.ImportCDKs(req.CampaignID, codes, actor)
+		res, err := h.store.ImportCDKsForProject(firstNonEmpty(req.ProjectID, req.ProjectIDSnake), req.CampaignID, codes, actor)
 		respond(w, res, err)
 	case rest == "batch-freeze" && r.Method == http.MethodPost:
 		var req model.BatchIDsRequest

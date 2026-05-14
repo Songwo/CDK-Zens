@@ -438,6 +438,124 @@ func (s *Store) DashboardForUser(user *model.User) map[string]interface{} {
 	return s.dashboardLocked(ownedProjects)
 }
 
+func (s *Store) OnboardingStatusForUser(user *model.User) model.OnboardingStatus {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	isAdmin := user.Role == "admin"
+	canUseProject := func(p *model.Project) bool {
+		return p != nil && (isAdmin || p.CreatorID == user.ID)
+	}
+
+	status := model.OnboardingStatus{
+		StepPrerequisites: map[string]bool{},
+	}
+	latestProjectAt := ""
+	latestCampaignAt := ""
+	latestStockAt := ""
+	latestNodeAt := ""
+
+	for _, p := range s.data.Projects {
+		if !canUseProject(p) {
+			continue
+		}
+		status.ProjectCount++
+		if p.CreatedAt >= latestProjectAt {
+			latestProjectAt = p.CreatedAt
+			status.LatestProjectID = p.ID
+			status.RecommendedProjectID = p.ID
+			status.RecommendedProject = map[string]interface{}{"id": p.ID, "name": p.Name, "createdAt": p.CreatedAt}
+		}
+	}
+	status.HasProject = status.ProjectCount > 0
+
+	for _, c := range s.data.Campaigns {
+		p := s.data.Projects[c.ProjectID]
+		if !canUseProject(p) {
+			continue
+		}
+		status.CampaignCount++
+		if c.CreatedAt >= latestCampaignAt {
+			latestCampaignAt = c.CreatedAt
+			status.LatestCampaignID = c.ID
+			status.RecommendedCampaignID = c.ID
+			status.RecommendedCampaign = s.campaignViewLocked(c)
+		}
+		if c.TotalStock > 0 && c.CreatedAt >= latestStockAt {
+			latestStockAt = c.CreatedAt
+			status.LatestStockCampaignID = c.ID
+		}
+	}
+	status.HasCampaign = status.CampaignCount > 0
+
+	for _, cdk := range s.data.CDKs {
+		c := s.data.Campaigns[cdk.CampaignID]
+		if c == nil || !canUseProject(s.data.Projects[c.ProjectID]) {
+			continue
+		}
+		status.CdkCount++
+	}
+	status.HasCdkStock = status.CdkCount > 0
+
+	for _, n := range s.data.Nodes {
+		if !canUseProject(s.data.Projects[n.ProjectID]) {
+			continue
+		}
+		status.NodeCount++
+		if n.CreatedAt >= latestNodeAt {
+			latestNodeAt = n.CreatedAt
+			status.LatestNodeID = n.ID
+			status.RecommendedNodeID = n.ID
+			status.LatestNodeLink = "/claim/" + n.Slug
+			status.RecommendedPublicLink = status.LatestNodeLink
+			status.RecommendedNode = s.nodeViewLocked(n)
+		}
+		if n.Status == model.StatusActive && n.Slug != "" {
+			status.HasPublicLink = true
+		}
+	}
+	status.HasDistributionNode = status.NodeCount > 0
+
+	for _, r := range s.data.RiskRules {
+		if r.Enabled {
+			status.HasRiskConfig = true
+			break
+		}
+	}
+	if !status.HasRiskConfig {
+		status.HasRiskConfig = s.data.CaptchaConfig.Enabled
+	}
+
+	switch {
+	case !status.HasProject:
+		status.CurrentStep = 1
+		status.NextActionHint = "请先创建项目"
+	case !status.HasCampaign:
+		status.CurrentStep = 2
+		status.NextActionHint = "请创建活动"
+	case !status.HasCdkStock:
+		status.CurrentStep = 3
+		status.NextActionHint = "请导入 CDK"
+	case !status.HasDistributionNode:
+		status.CurrentStep = 4
+		status.NextActionHint = "请创建分发节点"
+	case !status.HasRiskConfig:
+		status.CurrentStep = 5
+		status.NextActionHint = "请配置验证码或风控"
+	case !status.HasPublicLink:
+		status.CurrentStep = 6
+		status.NextActionHint = "请复制链接并测试"
+	default:
+		status.CurrentStep = 7
+		status.NextActionHint = "流程已完成"
+	}
+	status.StepPrerequisites["campaign"] = status.HasProject
+	status.StepPrerequisites["cdk"] = status.HasCampaign
+	status.StepPrerequisites["node"] = status.HasCampaign && status.HasCdkStock
+	status.StepPrerequisites["link"] = status.HasDistributionNode
+	return status
+}
+
 func (s *Store) dashboardLocked(scopeProjectIDs map[string]bool) map[string]interface{} {
 	stats := map[string]interface{}{"activeCampaigns": 0, "totalCampaigns": 0, "totalStock": 0, "claimedCount": 0, "remainingCount": 0, "todayClaims": 0, "totalNodes": 0, "abnormalNodes": 0, "successRate": 0.0, "failedClaims": 0}
 	campaigns := []map[string]interface{}{}
@@ -689,15 +807,17 @@ func (s *Store) ListCampaigns(q map[string]string) model.PageResult {
 	defer s.mu.RUnlock()
 	rows := []map[string]interface{}{}
 	kw := strings.ToLower(q["keyword"])
+	projectFilter := firstNonEmpty(q["projectId"], q["project_id"])
 	for _, c := range s.data.Campaigns {
 		view := s.campaignViewLocked(c)
+		projectName := fmt.Sprint(view["projectName"])
 		if q["status"] != "" && q["status"] != "all" && fmt.Sprint(view["status"]) != q["status"] {
 			continue
 		}
-		if q["projectId"] != "" && c.ProjectID != q["projectId"] {
+		if projectFilter != "" && c.ProjectID != projectFilter {
 			continue
 		}
-		if kw != "" && !containsAny(kw, c.Name, c.Description, c.ID, c.ProjectCode) {
+		if kw != "" && !containsAny(kw, c.Name, c.Description, c.ID, c.ProjectCode, projectName) {
 			continue
 		}
 		rows = append(rows, view)
@@ -711,6 +831,7 @@ func (s *Store) ListCampaignsForUser(q map[string]string, user *model.User) mode
 	defer s.mu.RUnlock()
 	rows := []map[string]interface{}{}
 	kw := strings.ToLower(q["keyword"])
+	projectFilter := firstNonEmpty(q["projectId"], q["project_id"])
 	isAdmin := user.Role == "admin"
 	for _, c := range s.data.Campaigns {
 		p := s.data.Projects[c.ProjectID]
@@ -721,10 +842,10 @@ func (s *Store) ListCampaignsForUser(q map[string]string, user *model.User) mode
 		if q["status"] != "" && q["status"] != "all" && fmt.Sprint(view["status"]) != q["status"] {
 			continue
 		}
-		if q["projectId"] != "" && c.ProjectID != q["projectId"] {
+		if projectFilter != "" && c.ProjectID != projectFilter {
 			continue
 		}
-		if kw != "" && !containsAny(kw, c.Name, c.Description, c.ID, c.ProjectCode) {
+		if kw != "" && !containsAny(kw, c.Name, c.Description, c.ID, c.ProjectCode, safeProjectName(p)) {
 			continue
 		}
 		rows = append(rows, view)
@@ -739,12 +860,15 @@ func (s *Store) CreateCampaign(req model.CreateCampaignRequest, actor string) (m
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	projectID := req.ProjectID
+	projectID := campaignRequestProjectID(req)
 	if projectID == "" {
-		return nil, model.NewAppError(http.StatusBadRequest, "PROJECT_REQUIRED", "必须指定项目")
+		if len(s.data.Projects) == 0 {
+			return nil, model.NewAppError(http.StatusBadRequest, "PROJECT_REQUIRED", "请先创建项目")
+		}
+		return nil, model.NewAppError(http.StatusBadRequest, "PROJECT_REQUIRED", "请选择所属项目")
 	}
 	if s.data.Projects[projectID] == nil {
-		return nil, model.NewAppError(http.StatusNotFound, "PROJECT_NOT_FOUND", "指定的项目不存在")
+		return nil, model.NewAppError(http.StatusNotFound, "PROJECT_NOT_FOUND", "项目不存在，请先创建项目")
 	}
 	now := nowISO()
 	status := model.StatusActive
@@ -785,14 +909,15 @@ func (s *Store) UpdateCampaign(id string, req model.UpdateCampaignRequest, actor
 		c.Name = strings.TrimSpace(req.Name)
 	}
 	c.Description = req.Description
-	if req.ProjectID != "" && req.ProjectID != c.ProjectID {
-		if s.data.Projects[req.ProjectID] == nil {
-			return nil, model.ErrNotFound
+	projectID := campaignRequestProjectID(req)
+	if projectID != "" && projectID != c.ProjectID {
+		if s.data.Projects[projectID] == nil {
+			return nil, model.NewAppError(http.StatusNotFound, "PROJECT_NOT_FOUND", "项目不存在，请先创建项目")
 		}
 		if old := s.data.Projects[c.ProjectID]; old != nil {
 			old.CampaignIDs = removeString(old.CampaignIDs, c.ID)
 		}
-		c.ProjectID = req.ProjectID
+		c.ProjectID = projectID
 		s.data.Projects[c.ProjectID].CampaignIDs = appendUnique(s.data.Projects[c.ProjectID].CampaignIDs, c.ID)
 	}
 	if req.StartAt != "" || req.StartTime != "" {
@@ -869,6 +994,7 @@ func (s *Store) ListCDKs(q map[string]string) model.PageResult {
 	defer s.mu.RUnlock()
 	rows := []map[string]interface{}{}
 	kw := strings.ToLower(q["keyword"])
+	projectFilter := firstNonEmpty(q["projectId"], q["project_id"])
 	for _, cdk := range s.data.CDKs {
 		if q["campaignId"] != "" && cdk.CampaignID != q["campaignId"] {
 			continue
@@ -877,10 +1003,19 @@ func (s *Store) ListCDKs(q map[string]string) model.PageResult {
 			continue
 		}
 		c := s.data.Campaigns[cdk.CampaignID]
-		if kw != "" && !containsAny(kw, cdk.Code, cdk.ID, safeCampaignName(c)) {
+		projectName := ""
+		projectID := ""
+		if c != nil {
+			projectID = c.ProjectID
+			projectName = safeProjectName(s.data.Projects[c.ProjectID])
+		}
+		if projectFilter != "" && projectID != projectFilter {
 			continue
 		}
-		rows = append(rows, map[string]interface{}{"id": cdk.ID, "campaignId": cdk.CampaignID, "campaignName": safeCampaignName(c), "code": cdk.Code, "status": cdk.Status, "claimedByRecordId": cdk.ClaimedByRecordID, "claimedAt": cdk.ClaimedAt, "nodeId": cdk.NodeID, "createdAt": cdk.CreatedAt, "updatedAt": cdk.UpdatedAt})
+		if kw != "" && !containsAny(kw, cdk.Code, cdk.ID, safeCampaignName(c), projectName) {
+			continue
+		}
+		rows = append(rows, map[string]interface{}{"id": cdk.ID, "projectId": projectID, "projectName": projectName, "campaignId": cdk.CampaignID, "campaignName": safeCampaignName(c), "code": cdk.Code, "status": cdk.Status, "claimedByRecordId": cdk.ClaimedByRecordID, "claimedAt": cdk.ClaimedAt, "nodeId": cdk.NodeID, "createdAt": cdk.CreatedAt, "updatedAt": cdk.UpdatedAt})
 	}
 	sort.Slice(rows, func(i, j int) bool { return fmt.Sprint(rows[i]["createdAt"]) > fmt.Sprint(rows[j]["createdAt"]) })
 	return paginateMaps(rows, q)
@@ -891,9 +1026,16 @@ func (s *Store) ListCDKsForUser(q map[string]string, user *model.User) model.Pag
 	defer s.mu.RUnlock()
 	rows := []map[string]interface{}{}
 	kw := strings.ToLower(q["keyword"])
+	projectFilter := firstNonEmpty(q["projectId"], q["project_id"])
 	isAdmin := user.Role == "admin"
 	for _, cdk := range s.data.CDKs {
 		c := s.data.Campaigns[cdk.CampaignID]
+		projectName := ""
+		projectID := ""
+		if c != nil {
+			projectID = c.ProjectID
+			projectName = safeProjectName(s.data.Projects[c.ProjectID])
+		}
 		if !isAdmin {
 			if c == nil {
 				continue
@@ -909,21 +1051,41 @@ func (s *Store) ListCDKsForUser(q map[string]string, user *model.User) model.Pag
 		if q["status"] != "" && q["status"] != "all" && cdk.Status != q["status"] {
 			continue
 		}
-		if kw != "" && !containsAny(kw, cdk.Code, cdk.ID, safeCampaignName(c)) {
+		if projectFilter != "" && projectID != projectFilter {
 			continue
 		}
-		rows = append(rows, map[string]interface{}{"id": cdk.ID, "campaignId": cdk.CampaignID, "campaignName": safeCampaignName(c), "code": cdk.Code, "status": cdk.Status, "claimedByRecordId": cdk.ClaimedByRecordID, "claimedAt": cdk.ClaimedAt, "nodeId": cdk.NodeID, "createdAt": cdk.CreatedAt, "updatedAt": cdk.UpdatedAt})
+		if kw != "" && !containsAny(kw, cdk.Code, cdk.ID, safeCampaignName(c), projectName) {
+			continue
+		}
+		rows = append(rows, map[string]interface{}{"id": cdk.ID, "projectId": projectID, "projectName": projectName, "campaignId": cdk.CampaignID, "campaignName": safeCampaignName(c), "code": cdk.Code, "status": cdk.Status, "claimedByRecordId": cdk.ClaimedByRecordID, "claimedAt": cdk.ClaimedAt, "nodeId": cdk.NodeID, "createdAt": cdk.CreatedAt, "updatedAt": cdk.UpdatedAt})
 	}
 	sort.Slice(rows, func(i, j int) bool { return fmt.Sprint(rows[i]["createdAt"]) > fmt.Sprint(rows[j]["createdAt"]) })
 	return paginateMaps(rows, q)
 }
 
 func (s *Store) ImportCDKs(campaignID string, codes []string, actor string) (*model.ImportCDKResponse, error) {
+	return s.ImportCDKsForProject("", campaignID, codes, actor)
+}
+
+func (s *Store) ImportCDKsForProject(projectID, campaignID string, codes []string, actor string) (*model.ImportCDKResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if strings.TrimSpace(campaignID) == "" {
+		return nil, model.NewAppError(http.StatusBadRequest, "CAMPAIGN_REQUIRED", "请先创建活动")
+	}
+	if len(codes) == 0 {
+		return nil, model.NewAppError(http.StatusBadRequest, "CDK_EMPTY", "CDK 不能为空")
+	}
 	c := s.data.Campaigns[campaignID]
 	if c == nil {
-		return nil, model.ErrNotFound
+		return nil, model.NewAppError(http.StatusNotFound, "CAMPAIGN_NOT_FOUND", "活动不存在，请先创建活动")
+	}
+	p := s.data.Projects[c.ProjectID]
+	if p == nil {
+		return nil, model.NewAppError(http.StatusNotFound, "PROJECT_NOT_FOUND", "活动所属项目不存在，请先创建项目")
+	}
+	if projectID != "" && projectID != c.ProjectID {
+		return nil, model.NewAppError(http.StatusBadRequest, "PROJECT_CAMPAIGN_MISMATCH", "活动不属于所选项目")
 	}
 	now := nowISO()
 	existing := map[string]bool{}
@@ -952,6 +1114,7 @@ func (s *Store) ImportCDKs(campaignID string, codes []string, actor string) (*mo
 		}
 		s.addCDKLocked(campaignID, code, now)
 	}
+	resp.Failed = resp.Invalid
 	s.recalcCampaignLocked(c)
 	s.logLocked("operation", "info", "导入 CDK", fmt.Sprintf("活动 %s 导入 %d 条 CDK", c.Name, resp.Imported), actor, "", "campaign", campaignID, map[string]interface{}{"duplicates": resp.Duplicates, "invalid": resp.Invalid})
 	return resp, s.saveLocked()
@@ -2380,11 +2543,20 @@ func safeCampaignName(c *model.Campaign) string {
 	}
 	return c.Name
 }
+func safeProjectName(p *model.Project) string {
+	if p == nil {
+		return ""
+	}
+	return p.Name
+}
 func safeNodeName(n *model.DistributionNode) string {
 	if n == nil {
 		return ""
 	}
 	return n.Name
+}
+func campaignRequestProjectID(req model.CreateCampaignRequest) string {
+	return strings.TrimSpace(firstNonEmpty(req.ProjectID, req.ProjectIDSnake))
 }
 func paginateMaps(rows []map[string]interface{}, q map[string]string) model.PageResult {
 	page := queryInt(q, "page", 1)

@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { adminApi } from "../../lib/api";
+import { notifyOnboardingRefresh } from "../../components/DistributionGuide";
 import { ConfirmDialog, DataTable, Modal, PageHeader, SearchInput, StatCard, StatusBadge, Toast } from "../../components/ui";
 
 function items(res) { return res?.items || res || []; }
 function time(iso) { const d = new Date(iso); return iso && !Number.isNaN(d.getTime()) ? d.toLocaleString("zh-CN") : "--"; }
 
 export default function ProjectListPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [keyword, setKeyword] = useState("");
   const [loading, setLoading] = useState(true);
@@ -13,6 +17,7 @@ export default function ProjectListPage() {
   const [detail, setDetail] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   async function reload() {
     setLoading(true);
@@ -22,16 +27,31 @@ export default function ProjectListPage() {
   }
   useEffect(() => { reload(); }, [keyword]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("open") === "create") setForm({ name: "", description: "" });
+  }, [location.search]);
+
   async function save(e) {
     e.preventDefault();
+    if (submitting) return;
+    if (!form?.name?.trim()) return setToast({ type: "error", message: "项目名称不能为空" });
+    setSubmitting(true);
     try {
       if (form.id) await adminApi.updateProject(form.id, form);
       else await adminApi.createProject(form);
       setForm(null);
       setToast({ message: "项目已保存" });
-      reload();
+      await reload();
+      notifyOnboardingRefresh();
+      const params = new URLSearchParams(location.search);
+      if (params.get("open") === "create") {
+        navigate(params.get("returnTo") || "/admin/projects", { replace: true });
+      }
     } catch (err) {
       setToast({ type: "error", message: err.message });
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -74,11 +94,11 @@ export default function ProjectListPage() {
           { key: "actions", title: "操作", render: (r) => <div className="row-actions"><button className="btn btn--text" onClick={() => openDetail(r)}>详情</button><button className="btn btn--text" onClick={() => setForm(r)}>编辑</button><button className="btn btn--text" onClick={() => setConfirm({ action: "archive", row: r })}>归档</button><button className="btn btn--text danger" onClick={() => setConfirm({ action: "delete", row: r })}>删除</button></div> },
         ]} />
       </section>
-      <Modal open={!!form} title={form?.id ? "编辑项目" : "新建项目"} onCancel={() => setForm(null)}>
+      <Modal open={!!form} title={form?.id ? "编辑项目" : "新建项目"} onCancel={submitting ? undefined : () => setForm(null)}>
         <form className="modal-form" onSubmit={save}>
           <input className="styled-input" value={form?.name || ""} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="项目名称" />
           <textarea className="styled-textarea" value={form?.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="项目描述" />
-          <div className="modal-footer"><button type="button" className="modal-btn modal-btn--cancel" onClick={() => setForm(null)}>取消</button><button className="modal-btn modal-btn--primary">保存</button></div>
+          <div className="modal-footer"><button type="button" className="modal-btn modal-btn--cancel" onClick={() => setForm(null)} disabled={submitting}>取消</button><button className="modal-btn modal-btn--primary" disabled={submitting}>{submitting ? "保存中..." : "保存"}</button></div>
         </form>
       </Modal>
       <Modal open={!!detail} title="项目详情" onCancel={() => setDetail(null)}>

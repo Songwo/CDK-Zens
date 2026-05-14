@@ -1,96 +1,88 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Modal, Toast } from "./ui";
+import { adminApi } from "../lib/api";
+import { CopyButton, Modal, Toast } from "./ui";
 
 const STEPS = [
-  {
-    key: "project",
-    title: "创建项目",
-    desc: "先创建一个项目，用来归类活动和分发节点。",
-    btn: "去创建项目",
-    path: "/admin/projects",
-  },
-  {
-    key: "campaign",
-    title: "创建活动",
-    desc: "配置活动名称、时间范围、领取规则。",
-    btn: "创建活动",
-    path: "/admin/campaigns",
-  },
-  {
-    key: "cdk",
-    title: "导入 CDK",
-    desc: "把兑换码批量导入到对应活动库存中。",
-    btn: "导入 CDK",
-    path: "/admin/cdks",
-    requireCampaign: true,
-  },
-  {
-    key: "node",
-    title: "创建分发节点",
-    desc: "为活动生成一个公开领取入口。",
-    btn: "创建节点",
-    path: "/admin/nodes",
-    requireCampaign: true,
-  },
-  {
-    key: "security",
-    title: "开启验证码 / 风控",
-    desc: "根据需要开启 hCaptcha、IP 限制和设备限制。",
-    btn: "配置安全策略",
-    path: "/admin/captcha",
-  },
-  {
-    key: "test",
-    title: "复制链接并测试",
-    desc: "复制节点链接，打开公开领取页进行测试。",
-    btn: "查看分发链接",
-    path: "/admin/nodes",
-    requireNode: true,
-  },
+  { key: "project", index: 1, title: "创建项目", desc: "先创建一个项目，用来归类活动和分发节点。", btn: "去创建项目" },
+  { key: "campaign", index: 2, title: "创建活动", desc: "配置活动名称、时间范围、领取规则。", btn: "创建活动" },
+  { key: "cdk", index: 3, title: "导入 CDK", desc: "把兑换码批量导入到对应活动库存中。", btn: "导入 CDK" },
+  { key: "node", index: 4, title: "创建分发节点", desc: "为活动生成一个公开领取入口。", btn: "创建节点" },
+  { key: "security", index: 5, title: "开启验证码 / 风控", desc: "根据需要开启 hCaptcha、IP 限制和设备限制。", btn: "配置安全策略" },
+  { key: "test", index: 6, title: "复制链接并测试", desc: "复制节点链接，打开公开领取页进行测试。", btn: "查看分发链接" },
 ];
 
-function getCompletion(stats, nodes, captchaConfigured) {
-  const hasActiveNode = (nodes || []).some((n) => n.status === "active");
+const STORAGE_KEY = "miubox_guide_collapsed";
+const REFRESH_EVENT = "miubox:onboarding-refresh";
+
+function completionFromStatus(status) {
   return {
-    project: (stats.totalCampaigns || 0) > 0,
-    campaign: (stats.totalCampaigns || 0) > 0,
-    cdk: (stats.totalStock || 0) > 0,
-    node: (stats.totalNodes || 0) > 0,
-    security: captchaConfigured || (nodes || []).some((n) => n.requireCaptcha),
-    test: hasActiveNode,
+    project: !!status?.hasProject,
+    campaign: !!status?.hasCampaign,
+    cdk: !!status?.hasCdkStock,
+    node: !!status?.hasDistributionNode,
+    security: !!status?.hasRiskConfig,
+    test: !!status?.hasPublicLink,
   };
 }
 
-function getNextStep(completion) {
-  for (const step of STEPS) {
-    if (!completion[step.key]) return step.key;
-  }
-  return null;
+function routeForStep(step, status) {
+  const returnTo = encodeURIComponent("/admin/dashboard");
+  if (step.key === "project") return `/admin/projects?open=create&returnTo=${returnTo}`;
+  if (step.key === "campaign") return status?.recommendedProjectId ? `/admin/campaigns?open=create&projectId=${encodeURIComponent(status.recommendedProjectId)}&returnTo=${returnTo}` : `/admin/campaigns?open=create&returnTo=${returnTo}`;
+  if (step.key === "cdk") return status?.recommendedCampaignId ? `/admin/cdks/import?campaignId=${encodeURIComponent(status.recommendedCampaignId)}&returnTo=${returnTo}` : `/admin/cdks/import?returnTo=${returnTo}`;
+  if (step.key === "node") return status?.latestStockCampaignId ? `/admin/nodes/create?campaignId=${encodeURIComponent(status.latestStockCampaignId)}&returnTo=${returnTo}` : `/admin/nodes/create?returnTo=${returnTo}`;
+  if (step.key === "security") return "/admin/captcha";
+  return "/admin/nodes/links";
 }
 
-const STORAGE_KEY = "miubox_guide_collapsed";
+export function notifyOnboardingRefresh() {
+  window.dispatchEvent(new Event(REFRESH_EVENT));
+}
 
-export function DistributionGuideCard({ stats, nodes, captchaConfigured }) {
+export function DistributionGuideCard() {
   const navigate = useNavigate();
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
   });
 
-  const completion = getCompletion(stats || {}, nodes, captchaConfigured);
-  const nextStepKey = getNextStep(completion);
-  const allDone = !nextStepKey;
-  const doneCount = Object.values(completion).filter(Boolean).length;
+  async function reload() {
+    setLoading(true);
+    try {
+      setStatus(await adminApi.onboardingStatus());
+    } catch (err) {
+      setToast({ type: "error", message: err.message || "获取向导状态失败" });
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  // 全部完成时自动收起（仅首次）
+  useEffect(() => {
+    reload();
+    window.addEventListener(REFRESH_EVENT, reload);
+    window.addEventListener("focus", reload);
+    return () => {
+      window.removeEventListener(REFRESH_EVENT, reload);
+      window.removeEventListener("focus", reload);
+    };
+  }, []);
+
+  const completion = useMemo(() => completionFromStatus(status), [status]);
+  const doneCount = Object.values(completion).filter(Boolean).length;
+  const currentStep = status?.currentStep || 1;
+  const allDone = currentStep === 7;
+  const currentStepTitle = STEPS.find((step) => step.index === currentStep)?.title;
+
   useEffect(() => {
     if (allDone && !collapsed) {
       try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
       setCollapsed(true);
     }
-  }, [allDone]);
+  }, [allDone, collapsed]);
 
   function toggleCollapse() {
     const next = !collapsed;
@@ -99,15 +91,23 @@ export function DistributionGuideCard({ stats, nodes, captchaConfigured }) {
   }
 
   function handleStepClick(step) {
-    if (step.requireCampaign && !(stats?.totalCampaigns > 0)) {
-      setToast({ type: "error", message: "请先创建活动，再进行此操作" });
+    if (step.key === "campaign" && !status?.hasProject) {
+      setToast({ type: "error", message: "请先创建项目" });
       return;
     }
-    if (step.requireNode && !(stats?.totalNodes > 0)) {
+    if (step.key === "cdk" && !status?.hasCampaign) {
+      setToast({ type: "error", message: "请先创建活动" });
+      return;
+    }
+    if (step.key === "node" && !status?.hasCdkStock) {
+      setToast({ type: "error", message: "请先导入 CDK" });
+      return;
+    }
+    if (step.key === "test" && !status?.hasDistributionNode) {
       setToast({ type: "error", message: "请先创建分发节点" });
       return;
     }
-    navigate(step.path);
+    navigate(routeForStep(step, status));
   }
 
   return (
@@ -121,95 +121,61 @@ export function DistributionGuideCard({ stats, nodes, captchaConfigured }) {
               <h2>快速创建一次 CDK 分发</h2>
               {collapsed && (
                 <p style={{ margin: 0 }}>
-                  {allDone ? "✓ 分发流程已完成" : `进度 ${doneCount}/${STEPS.length}，建议下一步：${STEPS.find((s) => s.key === nextStepKey)?.title}`}
+                  {loading ? "正在同步流程状态..." : allDone ? "分发流程已完成" : `进度 ${doneCount}/${STEPS.length}，建议下一步：${currentStepTitle}`}
                 </p>
               )}
             </div>
           </div>
           <div className="distribution-guide__actions">
             <span className="distribution-guide__progress">{doneCount}/{STEPS.length}</span>
-            <button className="btn btn--secondary" onClick={() => setModalOpen(true)}>
-              分发向导
-            </button>
-            <button className="btn btn--text" onClick={toggleCollapse} title={collapsed ? "展开" : "收起"}>
-              {collapsed ? "展开" : "收起"}
-            </button>
+            <button className="btn btn--secondary" onClick={() => setModalOpen(true)}>分发向导</button>
+            <button className="btn btn--text" onClick={reload}>{loading ? "同步中" : "刷新"}</button>
+            <button className="btn btn--text" onClick={toggleCollapse} title={collapsed ? "展开" : "收起"}>{collapsed ? "展开" : "收起"}</button>
           </div>
         </div>
 
         {!collapsed && (
           <>
-            {!allDone && (
-              <p className="distribution-guide__subtitle">
-                按照下面步骤完成项目、活动、库存、节点和安全配置，新手也能快速上线领取页。
-              </p>
-            )}
-            {allDone && (
-              <p className="distribution-guide__subtitle distribution-guide__subtitle--done">
-                ✓ 分发流程已完成，你可以继续创建新的活动或复制已有节点链接进行投放。
-              </p>
-            )}
-
+            <p className={`distribution-guide__subtitle ${allDone ? "distribution-guide__subtitle--done" : ""}`}>
+              {allDone ? "分发流程已完成，你可以继续创建新的活动或复制已有节点链接进行投放。" : (status?.nextActionHint || "按照下面步骤完成项目、活动、库存、节点和安全配置。")}
+            </p>
             <div className="distribution-guide__steps">
-              {STEPS.map((step, idx) => {
+              {STEPS.map((step) => {
                 const done = completion[step.key];
-                const isCurrent = step.key === nextStepKey;
+                const isCurrent = !done && step.index === currentStep;
                 return (
-                  <div
-                    key={step.key}
-                    className={`guide-step ${done ? "guide-step--done" : ""} ${isCurrent ? "guide-step--current" : ""}`}
-                  >
-                    <div className="guide-step__icon">
-                      {done ? "✓" : idx + 1}
-                    </div>
+                  <div key={step.key} className={`guide-step ${done ? "guide-step--done" : ""} ${isCurrent ? "guide-step--current" : ""}`}>
+                    <div className="guide-step__icon">{done ? "✓" : step.index}</div>
                     <strong className="guide-step__title">{step.title}</strong>
                     <span className="guide-step__desc">{step.desc}</span>
-                    <button
-                      className={`btn ${isCurrent ? "btn--primary" : "btn--text"} guide-step__btn`}
-                      onClick={() => handleStepClick(step)}
-                    >
-                      {done ? "已完成" : step.btn}
+                    <span className="field-hint">{done ? "已完成" : isCurrent ? "当前推荐步骤" : "未完成"}</span>
+                    <button className={`btn ${isCurrent ? "btn--primary" : "btn--text"} guide-step__btn`} onClick={() => handleStepClick(step)}>
+                      {done ? "查看" : step.btn}
                     </button>
                   </div>
                 );
               })}
             </div>
-
-            {nextStepKey && (
+            {status?.recommendedPublicLink && (
               <div className="distribution-guide__hint">
-                建议下一步：<strong>{STEPS.find((s) => s.key === nextStepKey)?.title}</strong>
+                最新分发链接：<CopyButton value={window.location.origin + status.recommendedPublicLink}>复制链接</CopyButton>
               </div>
             )}
           </>
         )}
       </section>
 
-      {/* 详细分发向导 Modal */}
       <Modal open={modalOpen} title="分发向导 — 完整流程" onCancel={() => setModalOpen(false)}>
         <div className="guide-modal-body">
-          {allDone && (
-            <div className="guide-modal-done">
-              <span className="guide-modal-done__icon">🎉</span>
-              <p>分发流程已完成，你可以继续创建新的活动或复制已有节点链接进行投放。</p>
-            </div>
-          )}
           <ol className="guide-modal-steps">
-            {STEPS.map((step, idx) => {
+            {STEPS.map((step) => {
               const done = completion[step.key];
-              const isCurrent = step.key === nextStepKey;
+              const isCurrent = !done && step.index === currentStep;
               return (
                 <li key={step.key} className={`guide-modal-step ${done ? "guide-modal-step--done" : ""} ${isCurrent ? "guide-modal-step--current" : ""}`}>
-                  <div className="guide-modal-step__num">
-                    {done ? "✓" : idx + 1}
-                  </div>
-                  <div className="guide-modal-step__content">
-                    <strong>{step.title}</strong>
-                    <p>{step.desc}</p>
-                  </div>
-                  <button
-                    className={`btn ${isCurrent ? "btn--primary" : "btn--secondary"} guide-modal-step__btn`}
-                    onClick={() => { setModalOpen(false); handleStepClick(step); }}
-                  >
+                  <div className="guide-modal-step__num">{done ? "✓" : step.index}</div>
+                  <div className="guide-modal-step__content"><strong>{step.title}</strong><p>{step.desc}</p></div>
+                  <button className={`btn ${isCurrent ? "btn--primary" : "btn--secondary"} guide-modal-step__btn`} onClick={() => { setModalOpen(false); handleStepClick(step); }}>
                     {done ? "查看" : step.btn}
                   </button>
                 </li>
@@ -217,9 +183,7 @@ export function DistributionGuideCard({ stats, nodes, captchaConfigured }) {
             })}
           </ol>
         </div>
-        <div className="modal-footer">
-          <button className="modal-btn modal-btn--cancel" onClick={() => setModalOpen(false)}>关闭</button>
-        </div>
+        <div className="modal-footer"><button className="modal-btn modal-btn--cancel" onClick={() => setModalOpen(false)}>关闭</button></div>
       </Modal>
     </>
   );

@@ -60,6 +60,7 @@ function del(path) {
 export const adminApi = {
   dashboard: () => request("/api/admin/dashboard"),
   health: () => request("/api/admin/health"),
+  onboardingStatus: () => request("/api/admin/onboarding/status"),
 
   listProjects: (params) => request(`/api/admin/projects${qs(params)}`),
   createProject: (body) => post("/api/admin/projects", body),
@@ -85,7 +86,7 @@ export const adminApi = {
   importCampaignCDKs: (id, codes) => post(`/api/admin/campaigns/${id}/cdks/import`, { codes }),
 
   listCDKs: (params) => request(`/api/admin/cdks${qs(params)}`),
-  importCDKs: (campaignId, codes) => post("/api/admin/cdks/import", { campaignId, codes }),
+  importCDKs: (projectId, campaignId, codes) => post("/api/admin/cdks/import", { projectId, campaignId, codes }),
   freezeCDK: (id) => post(`/api/admin/cdks/${id}/freeze`),
   unfreezeCDK: (id) => post(`/api/admin/cdks/${id}/unfreeze`),
   invalidateCDK: (id) => post(`/api/admin/cdks/${id}/invalidate`),

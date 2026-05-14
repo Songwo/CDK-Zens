@@ -90,9 +90,9 @@ export default function DashboardPage() {
   ];
 
   const quickActions = [
-    { label: "新建活动", icon: "▦", onClick: () => navigate("/admin/campaigns") },
-    { label: "导入 CDK", icon: "⇪", onClick: () => navigate("/admin/cdks") },
-    { label: "创建节点", icon: "⎈", onClick: () => navigate("/admin/nodes") },
+    { label: "新建活动", icon: "▦", onClick: () => navigate("/admin/campaigns?open=create") },
+    { label: "导入 CDK", icon: "⇪", onClick: () => navigate("/admin/cdks/import") },
+    { label: "创建节点", icon: "⎈", onClick: () => navigate("/admin/nodes/create") },
     { label: "领取记录", icon: "◷", onClick: () => navigate("/admin/claims") },
     { label: "验证码", icon: "▣", onClick: () => navigate("/admin/captcha") },
     { label: "系统日志", icon: "☰", onClick: () => navigate("/admin/logs") },
@@ -104,7 +104,7 @@ export default function DashboardPage() {
         eyebrow="Operations"
         title="运营总览"
         description="集中观察活动、分发节点、库存、领取记录和异常提醒。"
-        actions={<div className="btn-group"><button className="btn btn--primary" onClick={() => navigate("/admin/campaigns")}>新建活动</button><button className="btn btn--secondary" onClick={() => navigate("/admin/nodes")}>创建节点</button></div>}
+        actions={<div className="btn-group"><button className="btn btn--primary" onClick={() => navigate("/admin/campaigns?open=create")}>新建活动</button><button className="btn btn--secondary" onClick={() => navigate("/admin/nodes/create")}>创建节点</button></div>}
       />
 
       <section className="stats-grid stats-grid--core">

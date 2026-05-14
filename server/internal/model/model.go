@@ -357,6 +357,7 @@ type UpdateProjectRequest struct {
 
 type CreateCampaignRequest struct {
 	ProjectID             string   `json:"projectId"`
+	ProjectIDSnake        string   `json:"project_id"`
 	Name                  string   `json:"name"`
 	Description           string   `json:"description"`
 	StartAt               string   `json:"startAt"`
@@ -410,9 +411,11 @@ type UpdateNodeRequest struct {
 }
 
 type ImportCDKRequest struct {
-	CampaignID string   `json:"campaignId"`
-	Codes      []string `json:"codes"`
-	Items      []string `json:"items"`
+	ProjectID      string   `json:"projectId"`
+	ProjectIDSnake string   `json:"project_id"`
+	CampaignID     string   `json:"campaignId"`
+	Codes          []string `json:"codes"`
+	Items          []string `json:"items"`
 }
 
 type ImportCDKResponse struct {
@@ -420,7 +423,36 @@ type ImportCDKResponse struct {
 	Success    int      `json:"successCount"`
 	Duplicates int      `json:"duplicates"`
 	Invalid    int      `json:"invalid"`
+	Failed     int      `json:"failedCount"`
 	Preview    []string `json:"preview"`
+}
+
+type OnboardingStatus struct {
+	HasProject            bool                   `json:"hasProject"`
+	ProjectCount          int                    `json:"projectCount"`
+	HasCampaign           bool                   `json:"hasCampaign"`
+	CampaignCount         int                    `json:"campaignCount"`
+	HasCdkStock           bool                   `json:"hasCdkStock"`
+	CdkCount              int                    `json:"cdkCount"`
+	HasDistributionNode   bool                   `json:"hasDistributionNode"`
+	NodeCount             int                    `json:"nodeCount"`
+	HasRiskConfig         bool                   `json:"hasRiskConfig"`
+	HasPublicLink         bool                   `json:"hasPublicLink"`
+	CurrentStep           int                    `json:"currentStep"`
+	RecommendedProjectID  string                 `json:"recommendedProjectId,omitempty"`
+	RecommendedCampaignID string                 `json:"recommendedCampaignId,omitempty"`
+	RecommendedNodeID     string                 `json:"recommendedNodeId,omitempty"`
+	RecommendedPublicLink string                 `json:"recommendedPublicLink,omitempty"`
+	LatestProjectID       string                 `json:"latestProjectId,omitempty"`
+	LatestCampaignID      string                 `json:"latestCampaignId,omitempty"`
+	LatestStockCampaignID string                 `json:"latestStockCampaignId,omitempty"`
+	LatestNodeID          string                 `json:"latestNodeId,omitempty"`
+	LatestNodeLink        string                 `json:"latestNodeLink,omitempty"`
+	NextActionHint        string                 `json:"nextActionHint,omitempty"`
+	StepPrerequisites     map[string]bool        `json:"stepPrerequisites,omitempty"`
+	RecommendedCampaign   map[string]interface{} `json:"recommendedCampaign,omitempty"`
+	RecommendedProject    map[string]interface{} `json:"recommendedProject,omitempty"`
+	RecommendedNode       map[string]interface{} `json:"recommendedNode,omitempty"`
 }
 
 type BatchIDsRequest struct {

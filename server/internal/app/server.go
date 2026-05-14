@@ -25,6 +25,7 @@ func New(cfg config.Config, stateStore *store.Store, logger *slog.Logger) *http.
 	// 健康检查
 	mux.HandleFunc("/health", handler.Health)
 	mux.HandleFunc("/api/admin/health", handler.AdminHealth)
+	mux.HandleFunc("/api/admin/onboarding/status", handler.AdminOnboardingStatus)
 	mux.HandleFunc("/api/admin/dashboard", handler.AdminDashboard)
 
 	// 管理端 API

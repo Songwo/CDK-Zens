@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { adminApi } from "../../lib/api";
+import CdkImportModal from "../../components/CdkImportModal";
+import { notifyOnboardingRefresh } from "../../components/DistributionGuide";
 import { ConfirmDialog, CopyButton, DataTable, EmptyState, FilterSelect, Modal, PageHeader, SearchInput, StatCard, StatusBadge, Toast } from "../../components/ui";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
@@ -29,15 +31,17 @@ export function FeaturePage({ feature }) {
 
 export function CDKInventoryPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
   const [status, setStatus] = useState("all");
+  const [projectId, setProjectId] = useState("");
   const [campaignId, setCampaignId] = useState("");
   const [selected, setSelected] = useState([]);
   const [importOpen, setImportOpen] = useState(false);
-  const [importText, setImportText] = useState("");
   const [confirm, setConfirm] = useState(null);
   const [toast, showToast] = useToast();
   const [tasks, setTasks] = useState([]);
@@ -46,8 +50,14 @@ export function CDKInventoryPage() {
   async function reload() {
     setLoading(true);
     try {
-      const [cdks, camps, exportTasks] = await Promise.all([adminApi.listCDKs({ keyword, status, campaignId, pageSize: 500 }), adminApi.listCampaigns({ pageSize: 200 }), adminApi.exportTasks({ type: "cdks", pageSize: 50 }).catch(() => ({ items: [] }))]);
+      const [cdks, projectData, camps, exportTasks] = await Promise.all([
+        adminApi.listCDKs({ keyword, status, projectId, campaignId, pageSize: 500 }),
+        adminApi.listProjects({ pageSize: 500 }),
+        adminApi.listCampaigns({ pageSize: 500 }),
+        adminApi.exportTasks({ type: "cdks", pageSize: 50 }).catch(() => ({ items: [] })),
+      ]);
       setRows(items(cdks));
+      setProjects(items(projectData));
       setCampaigns(items(camps));
       setTasks(items(exportTasks));
     } catch (err) {
@@ -57,11 +67,16 @@ export function CDKInventoryPage() {
     }
   }
 
-  useEffect(() => { reload(); }, [keyword, status, campaignId]);
+  useEffect(() => { reload(); }, [keyword, status, projectId, campaignId]);
   useEffect(() => {
-    if (location.pathname.endsWith("/import")) setImportOpen(true);
+    const params = new URLSearchParams(location.search);
+    if (location.pathname.endsWith("/import")) {
+      setCampaignId(params.get("campaignId") || campaignId);
+      setProjectId(params.get("projectId") || projectId);
+      setImportOpen(true);
+    }
     if (location.pathname.endsWith("/status")) setStatus("unused");
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   const stats = useMemo(() => ({
     total: rows.length,
@@ -70,13 +85,7 @@ export function CDKInventoryPage() {
     frozen: rows.filter((r) => r.status === "frozen").length,
     invalid: rows.filter((r) => r.status === "invalid").length,
   }), [rows]);
-
-  const preview = useMemo(() => {
-    const lines = importText.split(/\r?\n/).map((v) => v.trim());
-    const nonEmpty = lines.filter(Boolean);
-    const unique = new Set(nonEmpty);
-    return { total: lines.length, nonEmpty: nonEmpty.length, duplicates: nonEmpty.length - unique.size };
-  }, [importText]);
+  const visibleCampaigns = useMemo(() => projectId ? campaigns.filter((c) => c.projectId === projectId) : campaigns, [campaigns, projectId]);
 
   async function run(action, row) {
     try {
@@ -100,20 +109,6 @@ export function CDKInventoryPage() {
     }
   }
 
-  async function submitImport(e) {
-    e.preventDefault();
-    try {
-      const codes = importText.split(/\r?\n/).map((v) => v.trim()).filter(Boolean);
-      const res = await adminApi.importCDKs(campaignId || campaigns[0]?.id, codes);
-      showToast(`导入 ${res.imported || res.successCount || 0} 条，重复 ${res.duplicates || 0} 条，无效 ${res.invalid || 0} 条`);
-      setImportOpen(false);
-      setImportText("");
-      reload();
-    } catch (err) {
-      showToast(err.message, "error");
-    }
-  }
-
   return (
     <div className="admin-page">
       {toast && <Toast {...toast} onClose={() => showToast(null)} />}
@@ -125,7 +120,8 @@ export function CDKInventoryPage() {
         <StatCard label="冻结 / 失效" value={`${fmt(stats.frozen)} / ${fmt(stats.invalid)}`} tone="warning" />
       </section>
       <div className="toolbar panel-toolbar">
-        <FilterSelect value={campaignId} onChange={setCampaignId}><option value="">全部活动</option>{campaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</FilterSelect>
+        <FilterSelect value={projectId} onChange={(v) => { setProjectId(v); setCampaignId(""); }}><option value="">全部项目</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</FilterSelect>
+        <FilterSelect value={campaignId} onChange={setCampaignId}><option value="">全部活动</option>{visibleCampaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</FilterSelect>
         <FilterSelect value={status} onChange={setStatus}><option value="all">全部状态</option><option value="unused">未领取</option><option value="claimed">已领取</option><option value="frozen">已冻结</option><option value="invalid">已失效</option></FilterSelect>
         <SearchInput value={keyword} onChange={setKeyword} placeholder="搜索 CDK / 活动" />
         <button className="btn btn--secondary" disabled={!selected.length} onClick={() => setConfirm({ action: "batchFreeze" })}>批量冻结</button>
@@ -134,6 +130,7 @@ export function CDKInventoryPage() {
       <section className="panel">
         <DataTable loading={loading} rows={rows} pageSize={12} columns={[
           { key: "select", title: "选择", render: (r) => <input type="checkbox" checked={selected.includes(r.id)} onChange={(e) => setSelected((prev) => e.target.checked ? [...prev, r.id] : prev.filter((id) => id !== r.id))} /> },
+          { key: "projectName", title: "项目", render: (r) => r.projectName || "--" },
           { key: "campaignName", title: "活动" },
           { key: "code", title: "CDK", render: (r) => <code>{r.code}</code> },
           { key: "status", title: "状态", render: (r) => <StatusBadge status={r.status} /> },
@@ -152,14 +149,27 @@ export function CDKInventoryPage() {
           ]} />
         </section>
       )}
-      <Modal open={importOpen} title="批量导入 CDK" onCancel={() => setImportOpen(false)}>
-        <form className="modal-form" onSubmit={submitImport}>
-          <FilterSelect value={campaignId} onChange={setCampaignId}><option value="">选择活动</option>{campaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</FilterSelect>
-          <textarea className="styled-textarea mono" rows="10" value={importText} onChange={(e) => setImportText(e.target.value)} placeholder="每行一个 CDK" />
-          <div className="empty-panel empty-panel--compact">总行数 {preview.total}，有效 {preview.nonEmpty}，本批重复 {preview.duplicates}</div>
-          <div className="modal-footer"><button type="button" className="modal-btn modal-btn--cancel" onClick={() => setImportOpen(false)}>取消</button><button className="modal-btn modal-btn--primary">导入</button></div>
-        </form>
-      </Modal>
+      <CdkImportModal
+        open={importOpen}
+        projects={projects}
+        campaigns={campaigns}
+        initialProjectId={projectId}
+        initialCampaignId={campaignId}
+        onCancel={() => setImportOpen(false)}
+        onCreateProject={() => navigate(`/admin/projects?open=create&returnTo=${encodeURIComponent("/admin/cdks/import")}`)}
+        onSuccess={(res, campaign) => {
+          showToast(`成功导入 ${res.imported || res.successCount || 0} 个 CDK 到活动【${campaign?.name || "未知活动"}】`);
+          setImportOpen(false);
+          notifyOnboardingRefresh();
+          const returnTo = new URLSearchParams(location.search).get("returnTo");
+          if (returnTo) {
+            navigate(returnTo, { replace: true });
+            return;
+          }
+          reload();
+        }}
+        onError={(message) => showToast(message, "error")}
+      />
       <ConfirmDialog open={!!confirm} danger title="确认危险操作" description="该操作会修改 CDK 状态或删除未使用 CDK，确认继续？" onCancel={() => setConfirm(null)} onConfirm={() => run(confirm.action, confirm.row)} />
     </div>
   );
