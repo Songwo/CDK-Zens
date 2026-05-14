@@ -7,12 +7,15 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/joho/godotenv"
+
 	"cdk-airdrop-station/server/internal/app"
 	"cdk-airdrop-station/server/internal/config"
 	"cdk-airdrop-station/server/internal/store"
 )
 
 func main() {
+	godotenv.Load()
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
 	cfg, err := config.Load()

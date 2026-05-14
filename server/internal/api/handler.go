@@ -162,7 +162,7 @@ func (h *Handler) AdminCampaignsRouter(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case http.MethodGet:
-		writeJSON(w, http.StatusOK, h.store.ListCampaigns(queryMap(r)))
+		writeJSON(w, http.StatusOK, h.store.ListCampaignsForUser(queryMap(r), user))
 	case http.MethodPost:
 		var req model.CreateCampaignRequest
 		if err := decodeJSON(r, &req); err != nil {
@@ -211,17 +211,17 @@ func (h *Handler) AdminCampaignDetailRouter(w http.ResponseWriter, r *http.Reque
 	case action == "cdks" && r.Method == http.MethodGet:
 		q := queryMap(r)
 		q["campaignId"] = id
-		writeJSON(w, http.StatusOK, h.store.ListCDKs(q))
+		writeJSON(w, http.StatusOK, h.store.ListCDKsForUser(q, user))
 	case action == "nodes" && r.Method == http.MethodGet:
 		q := queryMap(r)
 		q["campaignId"] = id
-		writeJSON(w, http.StatusOK, h.store.ListNodes(q))
+		writeJSON(w, http.StatusOK, h.store.ListNodesForUser(q, user))
 	case action == "claims" || action == "records":
 		q := queryMap(r)
 		q["campaignId"] = id
-		writeJSON(w, http.StatusOK, h.store.ListClaims(q))
+		writeJSON(w, http.StatusOK, h.store.ListClaimsForUser(q, user))
 	case action == "stats" && r.Method == http.MethodGet:
-		writeJSON(w, http.StatusOK, h.store.Analytics(map[string]string{"campaignId": id, "range": "30d"}))
+		writeJSON(w, http.StatusOK, h.store.AnalyticsForUser(map[string]string{"campaignId": id, "range": "30d"}, user))
 	case action == "cdks/import" && r.Method == http.MethodPost:
 		var req model.ImportCDKRequest
 		if err := decodeJSON(r, &req); err != nil {
@@ -253,7 +253,7 @@ func (h *Handler) AdminCDKsRouter(w http.ResponseWriter, r *http.Request) {
 		writeError(w, methodErr())
 		return
 	}
-	writeJSON(w, http.StatusOK, h.store.ListCDKs(queryMap(r)))
+	writeJSON(w, http.StatusOK, h.store.ListCDKsForUser(queryMap(r), user))
 }
 
 func (h *Handler) AdminCDKDetailRouter(w http.ResponseWriter, r *http.Request) {
@@ -324,7 +324,7 @@ func (h *Handler) AdminNodesRouter(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case http.MethodGet:
-		writeJSON(w, http.StatusOK, h.store.ListNodes(queryMap(r)))
+		writeJSON(w, http.StatusOK, h.store.ListNodesForUser(queryMap(r), user))
 	case http.MethodPost:
 		var req model.CreateNodeRequest
 		if err := decodeJSON(r, &req); err != nil {
@@ -387,7 +387,7 @@ func (h *Handler) AdminNodeDetailRouter(w http.ResponseWriter, r *http.Request) 
 		case action == "claims" && r.Method == http.MethodGet:
 			q := queryMap(r)
 			q["nodeId"] = id
-			writeJSON(w, http.StatusOK, h.store.ListClaims(q))
+			writeJSON(w, http.StatusOK, h.store.ListClaimsForUser(q, user))
 		default:
 			writeError(w, methodErr())
 		}
@@ -472,7 +472,7 @@ func (h *Handler) AdminClaimsRouter(w http.ResponseWriter, r *http.Request) {
 	}
 	actor := user.ID
 	if r.URL.Path == "/api/admin/claims" && r.Method == http.MethodGet {
-		writeJSON(w, http.StatusOK, h.store.ListClaims(queryMap(r)))
+		writeJSON(w, http.StatusOK, h.store.ListClaimsForUser(queryMap(r), user))
 		return
 	}
 	if r.URL.Path == "/api/admin/claims/export" && r.Method == http.MethodPost {
@@ -498,7 +498,7 @@ func (h *Handler) AdminAnalyticsRouter(w http.ResponseWriter, r *http.Request) {
 		writeError(w, model.NewAppError(http.StatusUnauthorized, "UNAUTHORIZED", "请先登录"))
 		return
 	}
-	data := h.store.Analytics(queryMap(r))
+	data := h.store.AnalyticsForUser(queryMap(r), user)
 	path := strings.TrimPrefix(r.URL.Path, "/api/admin/analytics/")
 	switch path {
 	case "visits-trend":

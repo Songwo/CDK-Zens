@@ -13,7 +13,7 @@ const INITIAL_FORM = {
   totalStock: 100, perUserLimit: 1, rewardType: "cdk_list",
   rewardContent: "", rewardListText: "",
   enabled: true, needLogin: false, needBindIdentity: false, rules: "",
-  requireCaptcha: false, showStock: true, showEndTime: true,
+  requireCaptcha: true, showStock: true, showEndTime: true,
 };
 
 /* 轻量 Toast 组件 */

@@ -352,11 +352,16 @@ func (s *Store) CreateOrUpdateCommunityUser(communityUserID, username, avatar, n
 
 	// 创建新用户
 	now := time.Now()
+	// 如果未传递有效角色，默认使用 user，因为 admin 权限很高
+	finalRole := role
+	if finalRole == "" {
+		finalRole = "user"
+	}
 	u := &model.User{
 		ID:              MakeRandomString(12),
 		Username:        username,
 		Password:        "sso_community",
-		Role:            "admin",
+		Role:            finalRole,
 		CommunityUserID: communityUserID,
 		Avatar:          avatar,
 		Nickname:        nickname,
@@ -662,6 +667,33 @@ func (s *Store) ListCampaigns(q map[string]string) model.PageResult {
 	return paginateMaps(rows, q)
 }
 
+func (s *Store) ListCampaignsForUser(q map[string]string, user *model.User) model.PageResult {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	rows := []map[string]interface{}{}
+	kw := strings.ToLower(q["keyword"])
+	isAdmin := user.Role == "admin"
+	for _, c := range s.data.Campaigns {
+		p := s.data.Projects[c.ProjectID]
+		if !isAdmin && (p == nil || p.CreatorID != user.ID) {
+			continue
+		}
+		view := s.campaignViewLocked(c)
+		if q["status"] != "" && q["status"] != "all" && fmt.Sprint(view["status"]) != q["status"] {
+			continue
+		}
+		if q["projectId"] != "" && c.ProjectID != q["projectId"] {
+			continue
+		}
+		if kw != "" && !containsAny(kw, c.Name, c.Description, c.ID, c.ProjectCode) {
+			continue
+		}
+		rows = append(rows, view)
+	}
+	sort.Slice(rows, func(i, j int) bool { return fmt.Sprint(rows[i]["createdAt"]) > fmt.Sprint(rows[j]["createdAt"]) })
+	return paginateMaps(rows, q)
+}
+
 func (s *Store) CreateCampaign(req model.CreateCampaignRequest, actor string) (map[string]interface{}, error) {
 	if strings.TrimSpace(req.Name) == "" {
 		return nil, model.NewAppError(http.StatusBadRequest, "NAME_REQUIRED", "活动名称不能为空")
@@ -815,6 +847,38 @@ func (s *Store) ListCDKs(q map[string]string) model.PageResult {
 	return paginateMaps(rows, q)
 }
 
+func (s *Store) ListCDKsForUser(q map[string]string, user *model.User) model.PageResult {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	rows := []map[string]interface{}{}
+	kw := strings.ToLower(q["keyword"])
+	isAdmin := user.Role == "admin"
+	for _, cdk := range s.data.CDKs {
+		c := s.data.Campaigns[cdk.CampaignID]
+		if !isAdmin {
+			if c == nil {
+				continue
+			}
+			p := s.data.Projects[c.ProjectID]
+			if p == nil || p.CreatorID != user.ID {
+				continue
+			}
+		}
+		if q["campaignId"] != "" && cdk.CampaignID != q["campaignId"] {
+			continue
+		}
+		if q["status"] != "" && q["status"] != "all" && cdk.Status != q["status"] {
+			continue
+		}
+		if kw != "" && !containsAny(kw, cdk.Code, cdk.ID, safeCampaignName(c)) {
+			continue
+		}
+		rows = append(rows, map[string]interface{}{"id": cdk.ID, "campaignId": cdk.CampaignID, "campaignName": safeCampaignName(c), "code": cdk.Code, "status": cdk.Status, "claimedByRecordId": cdk.ClaimedByRecordID, "claimedAt": cdk.ClaimedAt, "nodeId": cdk.NodeID, "createdAt": cdk.CreatedAt, "updatedAt": cdk.UpdatedAt})
+	}
+	sort.Slice(rows, func(i, j int) bool { return fmt.Sprint(rows[i]["createdAt"]) > fmt.Sprint(rows[j]["createdAt"]) })
+	return paginateMaps(rows, q)
+}
+
 func (s *Store) ImportCDKs(campaignID string, codes []string, actor string) (*model.ImportCDKResponse, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -907,6 +971,35 @@ func (s *Store) ListNodes(q map[string]string) model.PageResult {
 	rows := []map[string]interface{}{}
 	kw := strings.ToLower(q["keyword"])
 	for _, n := range s.data.Nodes {
+		if q["status"] != "" && q["status"] != "all" && n.Status != q["status"] {
+			continue
+		}
+		if q["campaignId"] != "" && n.CampaignID != q["campaignId"] {
+			continue
+		}
+		if q["projectId"] != "" && n.ProjectID != q["projectId"] {
+			continue
+		}
+		if kw != "" && !containsAny(kw, n.Name, n.Slug, n.Title, n.Description) {
+			continue
+		}
+		rows = append(rows, s.nodeViewLocked(n))
+	}
+	sort.Slice(rows, func(i, j int) bool { return fmt.Sprint(rows[i]["createdAt"]) > fmt.Sprint(rows[j]["createdAt"]) })
+	return paginateMaps(rows, q)
+}
+
+func (s *Store) ListNodesForUser(q map[string]string, user *model.User) model.PageResult {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	rows := []map[string]interface{}{}
+	kw := strings.ToLower(q["keyword"])
+	isAdmin := user.Role == "admin"
+	for _, n := range s.data.Nodes {
+		p := s.data.Projects[n.ProjectID]
+		if !isAdmin && (p == nil || p.CreatorID != user.ID) {
+			continue
+		}
 		if q["status"] != "" && q["status"] != "all" && n.Status != q["status"] {
 			continue
 		}
@@ -1231,6 +1324,58 @@ func (s *Store) ListClaims(q map[string]string) model.PageResult {
 	return paginateMaps(rows, q)
 }
 
+func (s *Store) ListClaimsForUser(q map[string]string, user *model.User) model.PageResult {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	rows := []map[string]interface{}{}
+	kw := strings.ToLower(q["keyword"])
+	start, _ := time.Parse(timeLayout, q["startAt"])
+	end, _ := time.Parse(timeLayout, q["endAt"])
+	isAdmin := user.Role == "admin"
+	for _, r := range s.data.ClaimRecords {
+		p := s.data.Projects[r.ProjectID]
+		if !isAdmin && (p == nil || p.CreatorID != user.ID) {
+			continue
+		}
+		if q["campaignId"] != "" && r.CampaignID != q["campaignId"] {
+			continue
+		}
+		if q["nodeId"] != "" && r.NodeID != q["nodeId"] {
+			continue
+		}
+		if q["projectId"] != "" && r.ProjectID != q["projectId"] {
+			continue
+		}
+		if q["status"] != "" && q["status"] != "all" && r.Status != q["status"] {
+			continue
+		}
+		if q["ip"] != "" && !strings.Contains(r.IP, q["ip"]) {
+			continue
+		}
+		if q["fingerprint"] != "" && !strings.Contains(r.Fingerprint, q["fingerprint"]) {
+			continue
+		}
+		if !start.IsZero() || !end.IsZero() {
+			if t, err := time.Parse(timeLayout, r.CreatedAt); err == nil {
+				if !start.IsZero() && t.Before(start) {
+					continue
+				}
+				if !end.IsZero() && t.After(end) {
+					continue
+				}
+			}
+		}
+		c := s.data.Campaigns[r.CampaignID]
+		n := s.data.Nodes[r.NodeID]
+		if kw != "" && !containsAny(kw, r.Code, r.IP, r.Fingerprint, r.UserAgent, safeCampaignName(c), safeNodeName(n)) {
+			continue
+		}
+		rows = append(rows, s.claimViewLocked(r))
+	}
+	sort.Slice(rows, func(i, j int) bool { return fmt.Sprint(rows[i]["createdAt"]) > fmt.Sprint(rows[j]["createdAt"]) })
+	return paginateMaps(rows, q)
+}
+
 func (s *Store) GetClaim(id string) (map[string]interface{}, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
@@ -1278,6 +1423,70 @@ func (s *Store) Analytics(q map[string]string) map[string]interface{} {
 		campaignRank = append(campaignRank, s.campaignViewLocked(c))
 	}
 	for _, r := range s.data.ClaimRecords {
+		if !inRange(r.CreatedAt, start, end) {
+			continue
+		}
+		switch r.Status {
+		case model.StatusSuccess:
+			success++
+			addClaimTrend(claims, r.CreatedAt, "success")
+		case model.StatusBlocked:
+			blocked++
+			addClaimTrend(claims, r.CreatedAt, "blocked")
+		default:
+			failed++
+			addClaimTrend(claims, r.CreatedAt, "failed")
+		}
+		if r.Status != model.StatusSuccess {
+			failReasons[firstNonEmpty(r.Reason, "未知原因")]++
+		}
+	}
+	sort.Slice(campaignRank, func(i, j int) bool {
+		return toInt(campaignRank[i]["claimedCount"]) > toInt(campaignRank[j]["claimedCount"])
+	})
+	sort.Slice(nodeRank, func(i, j int) bool { return toInt(nodeRank[i]["claims"]) > toInt(nodeRank[j]["claims"]) })
+	return map[string]interface{}{"overview": map[string]interface{}{"success": success, "failed": failed, "blocked": blocked, "total": success + failed + blocked, "successRate": percent(success, success+failed+blocked)}, "visitsTrend": visits, "claimsTrend": claims, "conversionRanking": limitMaps(nodeRank, 10), "campaignRanking": limitMaps(campaignRank, 10), "nodeRanking": limitMaps(nodeRank, 10), "failureReasons": reasonRows(failReasons)}
+}
+
+func (s *Store) AnalyticsForUser(q map[string]string, user *model.User) map[string]interface{} {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	start, end := rangeBounds(q)
+	days := dateBuckets(start, end)
+	visits := make([]map[string]interface{}, len(days))
+	claims := make([]map[string]interface{}, len(days))
+	for i, d := range days {
+		visits[i] = map[string]interface{}{"date": d, "value": 0}
+		claims[i] = map[string]interface{}{"date": d, "success": 0, "failed": 0, "blocked": 0}
+	}
+	success, failed, blocked := 0, 0, 0
+	failReasons := map[string]int{}
+	campaignRank := []map[string]interface{}{}
+	nodeRank := []map[string]interface{}{}
+	isAdmin := user.Role == "admin"
+	
+	for _, n := range s.data.Nodes {
+		p := s.data.Projects[n.ProjectID]
+		if !isAdmin && (p == nil || p.CreatorID != user.ID) {
+			continue
+		}
+		nodeRank = append(nodeRank, s.nodeViewLocked(n))
+		if n.LastVisitedAt != "" {
+			addTrendValue(visits, n.LastVisitedAt, n.Visits)
+		}
+	}
+	for _, c := range s.data.Campaigns {
+		p := s.data.Projects[c.ProjectID]
+		if !isAdmin && (p == nil || p.CreatorID != user.ID) {
+			continue
+		}
+		campaignRank = append(campaignRank, s.campaignViewLocked(c))
+	}
+	for _, r := range s.data.ClaimRecords {
+		p := s.data.Projects[r.ProjectID]
+		if !isAdmin && (p == nil || p.CreatorID != user.ID) {
+			continue
+		}
 		if !inRange(r.CreatedAt, start, end) {
 			continue
 		}
