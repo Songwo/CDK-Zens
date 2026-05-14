@@ -9,16 +9,19 @@ import (
 )
 
 type Config struct {
-	Addr            string
-	DataFile        string
-	PublicDir       string
-	AllowedOrigins  []string
-	ShutdownTimeout time.Duration
-	RedisURL        string
-	RabbitMQURL     string
-	HCaptchaSecret  string
+	Addr              string
+	DataFile          string
+	PublicDir         string
+	AllowedOrigins    []string
+	ShutdownTimeout   time.Duration
+	RedisURL          string
+	RabbitMQURL       string
+	HCaptchaSecret    string
 	HCaptchaVerifyURL string
-	HCaptchaSiteKey string
+	HCaptchaSiteKey   string
+
+	// PostgreSQL
+	PostgresDSN string
 
 	// MySQL
 	MySQLDSN string
@@ -57,19 +60,20 @@ type Config struct {
 
 func Load() (Config, error) {
 	cfg := Config{
-		Addr:            envOrDefault("CDK_AIRDROP_ADDR", ":8088"),
-		DataFile:        envOrDefault("CDK_AIRDROP_DATA_FILE", filepath.Clean("./data/state.json")),
-		PublicDir:       envOrDefault("CDK_AIRDROP_PUBLIC_DIR", filepath.Clean("../web/dist")),
-		AllowedOrigins:  splitCSV(envOrDefault("CDK_AIRDROP_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")),
-		ShutdownTimeout: 10 * time.Second,
-		RedisURL:        envOrDefault("CDK_AIRDROP_REDIS_URL", ""),     // e.g., redis://localhost:6379/0
-		RabbitMQURL:     envOrDefault("CDK_AIRDROP_RABBITMQ_URL", ""),  // e.g., amqp://guest:guest@localhost:5672/
-		HCaptchaSecret:  envOrDefault("HCAPTCHA_SECRET", ""),
+		Addr:              envOrDefault("CDK_AIRDROP_ADDR", ":8088"),
+		DataFile:          envOrDefault("CDK_AIRDROP_DATA_FILE", filepath.Clean("./data/state.json")),
+		PublicDir:         envOrDefault("CDK_AIRDROP_PUBLIC_DIR", filepath.Clean("../web/dist")),
+		AllowedOrigins:    splitCSV(envOrDefault("CDK_AIRDROP_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")),
+		ShutdownTimeout:   10 * time.Second,
+		RedisURL:          envOrDefault("CDK_AIRDROP_REDIS_URL", ""),    // e.g., redis://localhost:6379/0
+		RabbitMQURL:       envOrDefault("CDK_AIRDROP_RABBITMQ_URL", ""), // e.g., amqp://guest:guest@localhost:5672/
+		HCaptchaSecret:    envOrDefault("HCAPTCHA_SECRET", ""),
 		HCaptchaVerifyURL: envOrDefault("HCAPTCHA_VERIFY_URL", "https://api.hcaptcha.com/siteverify"),
-		HCaptchaSiteKey: envOrDefault("HCAPTCHA_SITE_KEY", ""),
+		HCaptchaSiteKey:   envOrDefault("HCAPTCHA_SITE_KEY", ""),
 
-		// MySQL
-		MySQLDSN: envOrDefault("CDK_MYSQL_DSN", ""),
+		// SQL storage
+		PostgresDSN: firstEnv("CDK_POSTGRES_DSN", "DATABASE_URL"),
+		MySQLDSN:    envOrDefault("CDK_MYSQL_DSN", ""),
 
 		// 社区 SSO
 		CommunityURL:      envOrDefault("CDK_COMMUNITY_URL", "http://localhost:5173"),
@@ -118,6 +122,15 @@ func envOrDefault(key, fallback string) string {
 		return fallback
 	}
 	return value
+}
+
+func firstEnv(keys ...string) string {
+	for _, key := range keys {
+		if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func splitCSV(value string) []string {

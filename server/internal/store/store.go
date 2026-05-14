@@ -35,6 +35,7 @@ type Store struct {
 	mu          sync.RWMutex
 	data        model.SystemData
 	db          *sql.DB
+	dbDialect   string
 	redisClient *redis.Client
 	amqpConn    *amqp.Connection
 	amqpChannel *amqp.Channel
@@ -45,21 +46,33 @@ func New(path, redisURL, rabbitmqURL string) (*Store, error) {
 }
 
 func NewWithMySQL(path, mysqlDSN, redisURL, rabbitmqURL string) (*Store, error) {
+	return NewWithDatabase(path, "", mysqlDSN, redisURL, rabbitmqURL)
+}
+
+func NewWithDatabase(path, postgresDSN, mysqlDSN, redisURL, rabbitmqURL string) (*Store, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
 	s := &Store{path: path}
 
-	// MySQL mode: connect and load from database
-	if mysqlDSN != "" {
+	// SQL mode: PostgreSQL is preferred for Docker one-click deployment.
+	if postgresDSN != "" {
+		db, err := InitPostgres(postgresDSN)
+		if err != nil {
+			return nil, fmt.Errorf("postgres init: %w", err)
+		}
+		s.db = db
+		s.dbDialect = sqlDialectPostgres
+	} else if mysqlDSN != "" {
 		db, err := InitMySQL(mysqlDSN)
 		if err != nil {
 			return nil, fmt.Errorf("mysql init: %w", err)
 		}
 		s.db = db
+		s.dbDialect = sqlDialectMySQL
 	}
 
-	// JSON fallback: load from file if no MySQL or as seed data
+	// JSON fallback: load from file when no SQL database is configured.
 	if s.db == nil {
 		content, err := os.ReadFile(path)
 		if err != nil && !os.IsNotExist(err) {
@@ -87,9 +100,9 @@ func NewWithMySQL(path, mysqlDSN, redisURL, rabbitmqURL string) (*Store, error) 
 	}
 	s.mu.Lock()
 	s.migrateLocked()
-	// Load from MySQL after migration inits all maps
+	// Load from SQL after migration inits all maps
 	if s.db != nil {
-		s.loadFromMySQL()
+		s.loadFromSQL()
 	}
 	if s.db == nil {
 		s.saveLocked()
@@ -1490,7 +1503,7 @@ func (s *Store) AnalyticsForUser(q map[string]string, user *model.User) map[stri
 	campaignRank := []map[string]interface{}{}
 	nodeRank := []map[string]interface{}{}
 	isAdmin := user.Role == "admin"
-	
+
 	for _, n := range s.data.Nodes {
 		p := s.data.Projects[n.ProjectID]
 		if !isAdmin && (p == nil || p.CreatorID != user.ID) {
@@ -1983,8 +1996,8 @@ func (s *Store) SyncStockToRedis(p *model.Project) {}
 
 func (s *Store) saveLocked() error {
 	if s.db != nil {
-		// MySQL mode: sync all data to database
-		return s.syncAllToMySQL()
+		// SQL mode: sync all in-memory data to the configured database.
+		return s.syncAllToSQL()
 	}
 	payload, err := json.MarshalIndent(s.data, "", "  ")
 	if err != nil {
@@ -1997,10 +2010,10 @@ func (s *Store) saveLocked() error {
 	return os.Rename(tmp, s.path)
 }
 
-// syncAllToMySQL writes all in-memory data to MySQL.
+// syncAllToSQL writes all in-memory data to the configured SQL database.
 // Called on every mutation (same as the old JSON full-write pattern).
 // For better perf, individual dbSave* calls can be used.
-func (s *Store) syncAllToMySQL() error {
+func (s *Store) syncAllToSQL() error {
 	for _, u := range s.data.Users {
 		s.dbSaveUser(u)
 	}
@@ -2024,6 +2037,9 @@ func (s *Store) syncAllToMySQL() error {
 	}
 	for _, b := range s.data.Blacklist {
 		s.dbSaveBlacklist(b)
+	}
+	for _, task := range s.data.ExportTasks {
+		s.dbSaveExportTask(task)
 	}
 	s.dbSaveSettings(s.data.Settings)
 	s.dbSaveCaptchaConfig(s.data.CaptchaConfig)

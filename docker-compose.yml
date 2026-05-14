@@ -3,13 +3,17 @@ services:
     build:
       context: .
     image: cdk-zens-miukey:latest
-    network_mode: host
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${CDK_AIRDROP_PORT:-8088}:8088"
     environment:
       - CDK_AIRDROP_ADDR=:8088
       - CDK_AIRDROP_DATA_FILE=/app/data/state.json
       - CDK_AIRDROP_PUBLIC_DIR=/app/dist
-      - CDK_MYSQL_DSN=${CDK_MYSQL_DSN:-}
+      - CDK_POSTGRES_DSN=${CDK_POSTGRES_DSN:-postgres://cdk_airdrop:cdk_airdrop_change_me@postgres:5432/cdk_airdrop?sslmode=disable}
       - CDK_AIRDROP_REDIS_URL=${CDK_AIRDROP_REDIS_URL:-}
       - CDK_AIRDROP_RABBITMQ_URL=${CDK_AIRDROP_RABBITMQ_URL:-}
       - HCAPTCHA_SECRET=${HCAPTCHA_SECRET:-}
@@ -20,6 +24,22 @@ services:
       - CDK_COMMUNITY_JWT_SECRET=${CDK_COMMUNITY_JWT_SECRET:-zf3sg4ikVorzR1S/cel4+o/VkQH+4LZxU8RkX0c0Ne6BFPf9NnPL09AoHSK9Zg95}
     volumes:
       - ./server/data:/app/data
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-cdk_airdrop}
+      - POSTGRES_USER=${POSTGRES_USER:-cdk_airdrop}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-cdk_airdrop_change_me}
+      - TZ=Asia/Shanghai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   redis:
     image: redis:7-alpine
@@ -37,3 +57,6 @@ services:
     ports:
       - "127.0.0.1:5672:5672"
       - "127.0.0.1:15672:15672"
+
+volumes:
+  postgres_data:

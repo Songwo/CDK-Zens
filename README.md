@@ -42,13 +42,18 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 
-Linux 服务器部署默认使用 `network_mode: host`，应用容器访问服务器本机 MySQL 时请在 `.env` 中使用：
+Docker Compose 会自动启动 PostgreSQL，默认访问地址为 `http://服务器IP:8088/`。首次部署无需手动创建数据库。
 
 ```text
-CDK_MYSQL_DSN=用户名:密码@tcp(127.0.0.1:3306)/cdk_airdrop?parseTime=true&charset=utf8mb4&loc=Local
+POSTGRES_DB=cdk_airdrop
+POSTGRES_USER=cdk_airdrop
+POSTGRES_PASSWORD=cdk_airdrop_change_me
+CDK_POSTGRES_DSN=postgres://cdk_airdrop:cdk_airdrop_change_me@postgres:5432/cdk_airdrop?sslmode=disable
 ```
 
-> 如果密码里有 `$`，写在 `.env` 里保持单个 `$`；只有直接写在 `docker-compose.yml` 中才需要写成 `$$`。
+如果修改了 `POSTGRES_USER` 或 `POSTGRES_PASSWORD`，请同步修改 `CDK_POSTGRES_DSN` 中的用户名和密码。旧的 `CDK_MYSQL_DSN` 仅保留兼容，不再作为 Docker 默认存储。
+
+PostgreSQL 数据保存在 Docker volume `postgres_data` 中；普通 `docker compose down` 不会删除数据。
 
 Redis / RabbitMQ 为可选增强组件，默认不启动。如需启用：
 
@@ -78,7 +83,8 @@ docker compose --profile cache up -d --build
 | 变量名 | 说明 | 示例 |
 | --- | --- | --- |
 | `CDK_AIRDROP_ADDR` | 服务监听地址 | `:8088` |
-| `CDK_MYSQL_DSN` | MySQL 连接串 | `user:pass@tcp(127.0.0.1:3306)/cdk_airdrop?parseTime=true&charset=utf8mb4&loc=Local` |
+| `CDK_POSTGRES_DSN` | PostgreSQL 连接串 | `postgres://cdk_airdrop:password@postgres:5432/cdk_airdrop?sslmode=disable` |
+| `CDK_MYSQL_DSN` | 旧 MySQL 连接串，仅兼容 | `user:pass@tcp(127.0.0.1:3306)/cdk_airdrop?parseTime=true&charset=utf8mb4&loc=Local` |
 | `CDK_AIRDROP_REDIS_URL` | Redis 连接串，可留空 | `redis://127.0.0.1:6379/0` |
 | `CDK_AIRDROP_RABBITMQ_URL` | RabbitMQ 连接串，可留空 | `amqp://guest:guest@127.0.0.1:5672/` |
 | `CDK_AIRDROP_DATA_FILE` | 状态存储路径 | `./data/state.json` |
