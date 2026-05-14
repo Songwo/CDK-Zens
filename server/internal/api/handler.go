@@ -833,7 +833,11 @@ func (h *Handler) AuthCommunityLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 解析社区 SSO Token（使用相同密钥）
-	secret := []byte("zf3sg4ikVorzR1S/cel4+o/VkQH+4LZxU8RkX0c0Ne6BFPf9NnPL09AoHSK9Zg95")
+	secretStr := os.Getenv("CDK_COMMUNITY_JWT_SECRET")
+	if secretStr == "" {
+		secretStr = "zf3sg4ikVorzR1S/cel4+o/VkQH+4LZxU8RkX0c0Ne6BFPf9NnPL09AoHSK9Zg95"
+	}
+	secret := []byte(secretStr)
 	token, err := jwt.Parse(req.SsoToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method")

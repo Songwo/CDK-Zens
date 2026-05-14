@@ -14,6 +14,7 @@ services:
       - HCAPTCHA_VERIFY_URL=${HCAPTCHA_VERIFY_URL:-https://api.hcaptcha.com/siteverify}
       - CDK_COMMUNITY_URL=${CDK_COMMUNITY_URL:-http://localhost:5173}
       - CDK_COMMUNITY_CLIENT_ID=${CDK_COMMUNITY_CLIENT_ID:-cdk-airdrop}
+      - CDK_COMMUNITY_JWT_SECRET=${CDK_COMMUNITY_JWT_SECRET:-zf3sg4ikVorzR1S/cel4+o/VkQH+4LZxU8RkX0c0Ne6BFPf9NnPL09AoHSK9Zg95}
     volumes:
       - ./server/data:/app/data
     depends_on:
