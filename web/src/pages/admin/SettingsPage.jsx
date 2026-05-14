@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { adminApi } from "../../lib/api";
+import { DEFAULT_BRAND, normalizeBrand, notifySettingsUpdated, setAppTitle } from "../../lib/brand";
 import { ConfirmDialog, DataTable, FilterSelect, Modal, PageHeader, StatCard, StatusBadge, Toast } from "../../components/ui";
 
 function time(iso) {
@@ -18,11 +19,15 @@ export default function SettingsPage() {
   const [restoreName, setRestoreName] = useState("");
   const [confirmRestore, setConfirmRestore] = useState(false);
   const [toast, setToast] = useState(null);
+  const [savingSettings, setSavingSettings] = useState(false);
   const mode = location.pathname.endsWith("/brand") ? "品牌配置" : location.pathname.endsWith("/storage") ? "存储与队列" : location.pathname.endsWith("/admins") ? "管理员" : "基础设置";
 
   async function reload() {
     const [s, h, a] = await Promise.all([adminApi.settings(), adminApi.health(), adminApi.admins()]);
-    setSettings(s);
+    const next = normalizeBrand(s);
+    setSettings(next);
+    setAppTitle(next);
+    notifySettingsUpdated(next);
     setHealth(h);
     setAdmins(a || []);
   }
@@ -31,11 +36,18 @@ export default function SettingsPage() {
 
   async function saveSettings(e) {
     e.preventDefault();
+    if (savingSettings) return;
+    setSavingSettings(true);
     try {
-      setSettings(await adminApi.updateSettings(settings));
+      const next = normalizeBrand(await adminApi.updateSettings(settings));
+      setSettings(next);
+      notifySettingsUpdated(next);
+      setAppTitle(next);
       setToast({ message: "系统设置已保存" });
     } catch (err) {
       setToast({ type: "error", message: err.message });
+    } finally {
+      setSavingSettings(false);
     }
   }
 
@@ -76,10 +88,10 @@ export default function SettingsPage() {
   return (
     <div className="admin-page">
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
-      <PageHeader eyebrow="System" title={mode} description="管理品牌、公网地址、存储状态、管理员和数据备份恢复。" actions={<div className="btn-group"><button className="btn btn--primary" onClick={saveSettings}>保存设置</button><button className="btn btn--secondary" onClick={backup}>数据备份</button></div>} />
+      <PageHeader eyebrow="System" title={mode} description="管理品牌、公网地址、存储状态、管理员和数据备份恢复。" actions={<div className="btn-group"><button className="btn btn--primary" onClick={saveSettings} disabled={savingSettings}>{savingSettings ? "保存中..." : "保存设置"}</button><button className="btn btn--secondary" onClick={backup}>数据备份</button></div>} />
       <section className="stats-grid">
         <StatCard label="系统名称" value={settings?.systemName || "--"} hint={settings?.brandEnglishName} tone="gold" />
-        <StatCard label="Logo" value={settings?.logoText || "MB"} />
+        <StatCard label="Logo" value={settings?.logoText || DEFAULT_BRAND.logoText} />
         <StatCard label="JSON 存储" value={health?.jsonStore || "--"} tone="success" />
         <StatCard label="Redis / RabbitMQ" value={`${health?.redis || "--"} / ${health?.rabbitmq || "--"}`} />
       </section>

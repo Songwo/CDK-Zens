@@ -189,10 +189,10 @@ CREATE TABLE IF NOT EXISTS `export_tasks` (
 -- 系统设置 (单行)
 CREATE TABLE IF NOT EXISTS `settings` (
   `id`                INT          PRIMARY KEY DEFAULT 1,
-  `system_name`       VARCHAR(100) DEFAULT '缪盒空投台',
-  `brand_name`        VARCHAR(100) DEFAULT '缪盒空投台',
-  `brand_english_name` VARCHAR(100) DEFAULT 'MiuBox Airdrop Hub',
-  `logo_text`         VARCHAR(20)  DEFAULT 'MB',
+  `system_name`       VARCHAR(100) DEFAULT 'Zens-CDK',
+  `brand_name`        VARCHAR(100) DEFAULT 'Zens-CDK',
+  `brand_english_name` VARCHAR(100) DEFAULT 'Zens CDK Airdrop Hub',
+  `logo_text`         VARCHAR(20)  DEFAULT 'ZC',
   `public_base_url`   VARCHAR(500) DEFAULT '',
   `storage_mode`      VARCHAR(20)  DEFAULT 'mysql',
   `redis_enabled`     TINYINT(1)   DEFAULT 0,

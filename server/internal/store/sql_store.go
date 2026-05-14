@@ -101,7 +101,7 @@ func autoMigrateMySQL(db *sql.DB) error {
 			hcaptcha_passed TINYINT(1) DEFAULT 0, risk_hit TINYINT(1) DEFAULT 0, risk_rule_ids TEXT,
 			user_id VARCHAR(32) DEFAULT '', reward_content TEXT, created_at VARCHAR(30) NOT NULL,
 			INDEX idx_campaign (campaign_id), INDEX idx_node (node_id), INDEX idx_project (project_id),
-			INDEX idx_fp (fingerprint), INDEX idx_ip (ip), INDEX idx_created (created_at)
+			INDEX idx_user (user_id), INDEX idx_fp (fingerprint), INDEX idx_ip (ip), INDEX idx_created (created_at)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 		`CREATE TABLE IF NOT EXISTS risk_rules (
 			id VARCHAR(32) PRIMARY KEY, name VARCHAR(200) NOT NULL, type VARCHAR(50) NOT NULL,
@@ -124,9 +124,9 @@ func autoMigrateMySQL(db *sql.DB) error {
 			error_msg TEXT, created_at VARCHAR(30) NOT NULL, finished_at VARCHAR(30) DEFAULT ''
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 		`CREATE TABLE IF NOT EXISTS settings (
-			id INT PRIMARY KEY DEFAULT 1, system_name VARCHAR(100) DEFAULT '缪盒空投台',
-			brand_name VARCHAR(100) DEFAULT '缪盒空投台', brand_english_name VARCHAR(100) DEFAULT 'MiuBox Airdrop Hub',
-			logo_text VARCHAR(20) DEFAULT 'MB', public_base_url VARCHAR(500) DEFAULT '', storage_mode VARCHAR(20) DEFAULT 'mysql',
+			id INT PRIMARY KEY DEFAULT 1, system_name VARCHAR(100) DEFAULT 'Zens-CDK',
+			brand_name VARCHAR(100) DEFAULT 'Zens-CDK', brand_english_name VARCHAR(100) DEFAULT 'Zens CDK Airdrop Hub',
+			logo_text VARCHAR(20) DEFAULT 'ZC', public_base_url VARCHAR(500) DEFAULT '', storage_mode VARCHAR(20) DEFAULT 'mysql',
 			redis_enabled TINYINT(1) DEFAULT 0, rabbitmq_enabled TINYINT(1) DEFAULT 0,
 			created_at VARCHAR(30) NOT NULL, updated_at VARCHAR(30) NOT NULL
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
@@ -194,6 +194,7 @@ func autoMigratePostgres(db *sql.DB) error {
 			created_at VARCHAR(30) NOT NULL,
 			updated_at VARCHAR(30) NOT NULL
 		)`,
+		`ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS project_id VARCHAR(32) DEFAULT ''`,
 		`CREATE INDEX IF NOT EXISTS idx_campaigns_project ON campaigns (project_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_campaigns_status ON campaigns (status)`,
 		`CREATE TABLE IF NOT EXISTS cdks (
@@ -233,6 +234,7 @@ func autoMigratePostgres(db *sql.DB) error {
 			created_at VARCHAR(30) NOT NULL,
 			updated_at VARCHAR(30) NOT NULL
 		)`,
+		`ALTER TABLE nodes ADD COLUMN IF NOT EXISTS project_id VARCHAR(32) DEFAULT ''`,
 		`CREATE UNIQUE INDEX IF NOT EXISTS uk_nodes_slug ON nodes (slug)`,
 		`CREATE INDEX IF NOT EXISTS idx_nodes_project ON nodes (project_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_nodes_campaign ON nodes (campaign_id)`,
@@ -257,10 +259,14 @@ func autoMigratePostgres(db *sql.DB) error {
 			reward_content TEXT,
 			created_at VARCHAR(30) NOT NULL
 		)`,
+		`ALTER TABLE claim_records ADD COLUMN IF NOT EXISTS project_id VARCHAR(32) DEFAULT ''`,
+		`ALTER TABLE claim_records ADD COLUMN IF NOT EXISTS user_id VARCHAR(32) DEFAULT ''`,
+		`ALTER TABLE claim_records ADD COLUMN IF NOT EXISTS reward_content TEXT`,
 		`CREATE INDEX IF NOT EXISTS idx_claim_records_campaign ON claim_records (campaign_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_claim_records_node ON claim_records (node_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_claim_records_project ON claim_records (project_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_claim_records_fingerprint ON claim_records (fingerprint)`,
+		`CREATE INDEX IF NOT EXISTS idx_claim_records_user ON claim_records (user_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_claim_records_ip ON claim_records (ip)`,
 		`CREATE INDEX IF NOT EXISTS idx_claim_records_created ON claim_records (created_at)`,
 		`CREATE TABLE IF NOT EXISTS risk_rules (
@@ -311,10 +317,10 @@ func autoMigratePostgres(db *sql.DB) error {
 		)`,
 		`CREATE TABLE IF NOT EXISTS settings (
 			id INT PRIMARY KEY DEFAULT 1,
-			system_name VARCHAR(100) DEFAULT '缪盒空投台',
-			brand_name VARCHAR(100) DEFAULT '缪盒空投台',
-			brand_english_name VARCHAR(100) DEFAULT 'MiuBox Airdrop Hub',
-			logo_text VARCHAR(20) DEFAULT 'MB',
+			system_name VARCHAR(100) DEFAULT 'Zens-CDK',
+			brand_name VARCHAR(100) DEFAULT 'Zens-CDK',
+			brand_english_name VARCHAR(100) DEFAULT 'Zens CDK Airdrop Hub',
+			logo_text VARCHAR(20) DEFAULT 'ZC',
 			public_base_url VARCHAR(500) DEFAULT '',
 			storage_mode VARCHAR(20) DEFAULT 'postgres',
 			redis_enabled BOOLEAN DEFAULT FALSE,

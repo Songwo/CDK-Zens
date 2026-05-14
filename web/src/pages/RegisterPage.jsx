@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { setAuthToken, publicApi } from "../lib/api";
+import { DEFAULT_BRAND, normalizeBrand, setAppTitle } from "../lib/brand";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -8,11 +9,16 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [brand, setBrand] = useState({ systemName: "缪盒空投台", brandEnglishName: "MiuBox Airdrop Hub", logoText: "MB" });
+  const [brand, setBrand] = useState(DEFAULT_BRAND);
 
   useEffect(() => {
+    setAppTitle(DEFAULT_BRAND);
     publicApi.brand().then((data) => {
-      if (data?.systemName) setBrand(data);
+      if (data?.systemName) {
+        const next = normalizeBrand(data);
+        setBrand(next);
+        setAppTitle(next);
+      }
     }).catch(() => {});
   }, []);
 

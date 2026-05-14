@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { claimApi, isLoggedIn, publicApi } from "../lib/api";
+import { DEFAULT_BRAND, normalizeBrand, setAppTitle } from "../lib/brand";
 import { getFingerprint } from "../lib/storage";
 import ParticleBurst from "../components/ParticleBurst";
 import HCaptchaBox from "../components/HCaptchaBox";
@@ -116,37 +117,60 @@ export default function ClaimPage() {
   const [burstTrigger, setBurstTrigger] = useState("");
   const [hcaptchaToken, setHcaptchaToken] = useState("");
   const [toast, setToast] = useState("");
-  const [brand, setBrand] = useState({ systemName: "缪盒空投台", brandEnglishName: "MiuBox Airdrop Hub", logoText: "MB" });
+  const [brand, setBrand] = useState(DEFAULT_BRAND);
   const hcaptchaRef = useRef(null);
   const fingerprint = getFingerprint();
   const storageKey = `claim-result:${projectCode}`;
 
-  useEffect(() => { publicApi.brand().then((d) => { if (d?.systemName) setBrand(d); }).catch(() => {}); }, []);
+  useEffect(() => {
+    setAppTitle(DEFAULT_BRAND);
+    publicApi.brand().then((d) => {
+      if (d?.systemName) {
+        const next = normalizeBrand(d);
+        setBrand(next);
+        setAppTitle(next);
+      }
+    }).catch(() => {});
+  }, []);
 
   const fetchProject = useCallback(async () => {
     try {
       const data = await claimApi.getNode(projectCode, fingerprint).catch(() => claimApi.getProject(projectCode, fingerprint));
       setProject(data);
+      if (data.userClaimed) {
+        const normalized = {
+          rewardContent: data.userRewardContent,
+          code: data.userRewardContent,
+          claimedAt: data.userClaimedAt,
+        };
+        setClaimResult(normalized);
+        localStorage.setItem(storageKey, JSON.stringify(normalized));
+        return;
+      }
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        setClaimResult(parsed);
         if (parsed.claimToken) {
-          claimApi.getResult(projectCode, parsed.claimToken).then((fresh) => {
+          try {
+            const fresh = await claimApi.getResult(projectCode, parsed.claimToken);
             const normalized = normalizeClaimResult(fresh);
             setClaimResult(normalized);
             localStorage.setItem(storageKey, JSON.stringify(normalized));
-          }).catch(() => {});
+          } catch {
+            localStorage.removeItem(storageKey);
+            setClaimResult(null);
+          }
+        } else {
+          localStorage.removeItem(storageKey);
+          setClaimResult(null);
         }
-      } else if (data.userClaimed) {
-        setClaimResult({ rewardContent: data.userRewardContent, claimedAt: data.userClaimedAt });
       }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [projectCode, fingerprint]);
+  }, [projectCode, fingerprint, storageKey]);
 
   useEffect(() => { fetchProject(); }, [fetchProject]);
 

@@ -13,6 +13,7 @@ const STEPS = [
 ];
 
 const STORAGE_KEY = "miubox_guide_collapsed";
+const AUTO_COLLAPSE_KEY = "miubox_guide_auto_collapsed_done";
 const REFRESH_EVENT = "miubox:onboarding-refresh";
 
 function completionFromStatus(status) {
@@ -49,6 +50,13 @@ export function DistributionGuideCard() {
   const [collapsed, setCollapsed] = useState(() => {
     try { return localStorage.getItem(STORAGE_KEY) === "1"; } catch { return false; }
   });
+  const [autoCollapsedDone, setAutoCollapsedDone] = useState(() => {
+    try {
+      return localStorage.getItem(AUTO_COLLAPSE_KEY) === "1" || localStorage.getItem(STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
 
   async function reload() {
     setLoading(true);
@@ -78,15 +86,21 @@ export function DistributionGuideCard() {
   const currentStepTitle = STEPS.find((step) => step.index === currentStep)?.title;
 
   useEffect(() => {
-    if (allDone && !collapsed) {
+    if (allDone && !collapsed && !autoCollapsedDone) {
       try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+      try { localStorage.setItem(AUTO_COLLAPSE_KEY, "1"); } catch {}
+      setAutoCollapsedDone(true);
       setCollapsed(true);
     }
-  }, [allDone, collapsed]);
+  }, [allDone, collapsed, autoCollapsedDone]);
 
   function toggleCollapse() {
     const next = !collapsed;
     setCollapsed(next);
+    if (allDone) {
+      setAutoCollapsedDone(true);
+      try { localStorage.setItem(AUTO_COLLAPSE_KEY, "1"); } catch {}
+    }
     try { localStorage.setItem(STORAGE_KEY, next ? "1" : "0"); } catch {}
   }
 

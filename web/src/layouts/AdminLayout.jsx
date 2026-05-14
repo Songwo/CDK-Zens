@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { clearAuthToken, isLoggedIn, adminApi, userApi } from "../lib/api";
+import { DEFAULT_BRAND, SETTINGS_UPDATED_EVENT, normalizeBrand, setAppTitle } from "../lib/brand";
 
 const NAV_GROUPS = [
   {
@@ -79,7 +80,7 @@ export default function AdminLayout() {
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [user, setUser] = useState(null);
   const [alertCount, setAlertCount] = useState(0);
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState(DEFAULT_BRAND);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef(null);
@@ -112,8 +113,34 @@ export default function AdminLayout() {
 
   // 获取系统设置（品牌名称）
   useEffect(() => {
-    if (!isLoggedIn()) return;
-    adminApi.settings().then(setSettings).catch(() => {});
+    let alive = true;
+    async function loadSettings() {
+      if (!isLoggedIn()) {
+        setAppTitle();
+        return;
+      }
+      try {
+        const data = normalizeBrand(await adminApi.settings());
+        if (!alive) return;
+        setSettings(data);
+        setAppTitle(data);
+      } catch {
+        setAppTitle(DEFAULT_BRAND);
+      }
+    }
+    function handleSettingsUpdated(event) {
+      const data = normalizeBrand(event.detail);
+      setSettings(data);
+      setAppTitle(data);
+    }
+    loadSettings();
+    window.addEventListener(SETTINGS_UPDATED_EVENT, handleSettingsUpdated);
+    window.addEventListener("focus", loadSettings);
+    return () => {
+      alive = false;
+      window.removeEventListener(SETTINGS_UPDATED_EVENT, handleSettingsUpdated);
+      window.removeEventListener("focus", loadSettings);
+    };
   }, []);
 
   // 路由变化时关闭移动端侧边栏
@@ -208,8 +235,8 @@ export default function AdminLayout() {
           <img src="/logo.png" alt="Logo" width="44" height="44" className="admin-sidebar__logo" style={{ objectFit: 'cover', background: 'transparent', boxShadow: 'none' }} />
           {!collapsed && (
             <div className="admin-sidebar__brand-text">
-              <h1>{settings?.systemName || "缪盒空投台"}</h1>
-              <span>{settings?.brandEnglishName || "MiuBox Airdrop Hub"}</span>
+              <h1>{settings?.systemName || DEFAULT_BRAND.systemName}</h1>
+              <span>{settings?.brandEnglishName || DEFAULT_BRAND.brandEnglishName}</span>
             </div>
           )}
           <button

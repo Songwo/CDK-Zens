@@ -26,7 +26,16 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-const timeLayout = time.RFC3339
+const (
+	timeLayout              = time.RFC3339
+	defaultSystemName       = "Zens-CDK"
+	defaultBrandName        = "Zens-CDK"
+	defaultBrandEnglishName = "Zens CDK Airdrop Hub"
+	defaultLogoText         = "ZC"
+	legacySystemName        = "缪盒空投台"
+	legacyBrandEnglishName  = "MiuBox Airdrop Hub"
+	legacyLogoText          = "MB"
+)
 
 var slugPattern = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
 
@@ -103,6 +112,9 @@ func NewWithDatabase(path, postgresDSN, mysqlDSN, redisURL, rabbitmqURL string) 
 	// Load from SQL after migration inits all maps
 	if s.db != nil {
 		s.loadFromSQL()
+		if s.normalizeSettingsLocked(nowISO()) {
+			_ = s.saveLocked()
+		}
 	}
 	if s.db == nil {
 		s.saveLocked()
@@ -155,13 +167,7 @@ func (s *Store) migrateLocked() {
 			s.data.Admins[id] = &cp
 		}
 	}
-	if s.data.Settings.SystemName == "" {
-		s.data.Settings = model.Settings{
-			SystemName: "缪盒空投台", BrandName: "缪盒空投台", BrandEnglishName: "MiuBox Airdrop Hub",
-			LogoText: "MB", PublicBaseURL: "http://127.0.0.1:5173", StorageMode: "json",
-			RedisEnabled: s.redisClient != nil, RabbitMQEnabled: s.amqpChannel != nil, CreatedAt: now, UpdatedAt: now,
-		}
-	}
+	s.normalizeSettingsLocked(now)
 	if s.data.CaptchaConfig.Provider == "" {
 		s.data.CaptchaConfig = model.CaptchaConfig{Provider: "hcaptcha", Enabled: true}
 	}
@@ -301,6 +307,60 @@ func (s *Store) migrateLocked() {
 			p.NodeIDs = appendUnique(p.NodeIDs, n.ID)
 		}
 	}
+}
+
+func (s *Store) normalizeSettingsLocked(now string) bool {
+	changed := false
+	if s.data.Settings.SystemName == "" {
+		s.data.Settings = model.Settings{
+			SystemName:       defaultSystemName,
+			BrandName:        defaultBrandName,
+			BrandEnglishName: defaultBrandEnglishName,
+			LogoText:         defaultLogoText,
+			PublicBaseURL:    "http://127.0.0.1:5173",
+			StorageMode:      s.defaultStorageMode(),
+			RedisEnabled:     s.redisClient != nil,
+			RabbitMQEnabled:  s.amqpChannel != nil,
+			CreatedAt:        now,
+			UpdatedAt:        now,
+		}
+		return true
+	}
+	if s.data.Settings.SystemName == legacySystemName {
+		s.data.Settings.SystemName = defaultSystemName
+		changed = true
+	}
+	if s.data.Settings.BrandName == "" || s.data.Settings.BrandName == legacySystemName {
+		s.data.Settings.BrandName = defaultBrandName
+		changed = true
+	}
+	if s.data.Settings.BrandEnglishName == "" || s.data.Settings.BrandEnglishName == legacyBrandEnglishName {
+		s.data.Settings.BrandEnglishName = defaultBrandEnglishName
+		changed = true
+	}
+	if s.data.Settings.LogoText == "" || s.data.Settings.LogoText == legacyLogoText {
+		s.data.Settings.LogoText = defaultLogoText
+		changed = true
+	}
+	if s.data.Settings.StorageMode == "" {
+		s.data.Settings.StorageMode = s.defaultStorageMode()
+		changed = true
+	}
+	if s.data.Settings.CreatedAt == "" {
+		s.data.Settings.CreatedAt = now
+		changed = true
+	}
+	if changed {
+		s.data.Settings.UpdatedAt = now
+	}
+	return changed
+}
+
+func (s *Store) defaultStorageMode() string {
+	if s.dbDialect != "" {
+		return s.dbDialect
+	}
+	return "json"
 }
 
 func (s *Store) addDefaultRiskRulesLocked(now string) {
@@ -1404,7 +1464,7 @@ func (s *Store) GetPublicNodeClaim(slug, userID, fingerprint string) (*model.Cla
 		n.UniqueVisitors = s.uniqueVisitorCountLocked(n.ID, fingerprint)
 	}
 	_ = s.saveLocked()
-	return s.claimInfoLocked(c, n, fingerprint), nil
+	return s.claimInfoLocked(c, n, userID, fingerprint), nil
 }
 
 func (s *Store) ClaimNodeReward(slug, userID, fingerprint, ip, ua string, captchaPassed bool) (*model.ClaimResponse, error) {
@@ -1418,6 +1478,11 @@ func (s *Store) ClaimNodeReward(slug, userID, fingerprint, ip, ua string, captch
 	if c == nil {
 		return nil, model.ErrNotFound
 	}
+	nodeID := n.ID
+	key := buildIdempotencyKey(c.ID, nodeID, fingerprint, ip, ua)
+	if existing := s.findExistingSuccessLocked(c.ID, nodeID, key, userID, fingerprint, ip, ua); existing != nil {
+		return claimResponseFromRecord(existing), nil
+	}
 	if err := s.validateClaimTargetLocked(c, n); err != nil {
 		s.recordFailedClaimLocked(c, n, "", ip, ua, fingerprint, err.Error(), model.StatusFailed, false, nil, captchaPassed)
 		return nil, err
@@ -1426,11 +1491,6 @@ func (s *Store) ClaimNodeReward(slug, userID, fingerprint, ip, ua string, captch
 		s.recordFailedClaimLocked(c, n, "", ip, ua, fingerprint, err.Error(), model.StatusBlocked, true, hit, captchaPassed)
 		s.logLocked("security", "warn", "风控拦截", err.Error(), "public", ip, "node", n.ID, map[string]interface{}{"rules": hit})
 		return nil, err
-	}
-	nodeID := n.ID
-	key := buildIdempotencyKey(c.ID, nodeID, fingerprint, ip, ua)
-	if existing := s.findExistingSuccessLocked(c.ID, nodeID, key, fingerprint, ip, ua); existing != nil {
-		return claimResponseFromRecord(existing), nil
 	}
 	var cdk *model.CDK
 	for _, item := range s.data.CDKs {
@@ -2290,14 +2350,12 @@ func (s *Store) claimViewLocked(r *model.ClaimRecord) map[string]interface{} {
 	return map[string]interface{}{"id": r.ID, "campaignId": r.CampaignID, "campaignName": safeCampaignName(s.data.Campaigns[r.CampaignID]), "nodeId": r.NodeID, "nodeName": safeNodeName(s.data.Nodes[r.NodeID]), "projectId": r.ProjectID, "cdkId": r.CDKID, "code": r.Code, "rewardContent": firstNonEmpty(r.RewardContent, r.Code), "status": r.Status, "reason": r.Reason, "ip": r.IP, "userAgent": r.UserAgent, "fingerprint": r.Fingerprint, "idempotencyKey": r.IdempotencyKey, "claimToken": r.ClaimToken, "hcaptchaPassed": r.HCaptchaPassed, "riskHit": r.RiskHit, "riskRuleIds": r.RiskRuleIDs, "createdAt": r.CreatedAt}
 }
 
-func (s *Store) claimInfoLocked(c *model.Campaign, n *model.DistributionNode, fingerprint string) *model.ClaimPageInfo {
+func (s *Store) claimInfoLocked(c *model.Campaign, n *model.DistributionNode, userID, fingerprint string) *model.ClaimPageInfo {
 	info := &model.ClaimPageInfo{NodeID: n.ID, NodeSlug: n.Slug, ProjectCode: n.Slug, Name: defaultString(n.Title, c.Name), Description: defaultString(n.Description, c.Description), StartTime: c.StartAt, EndTime: c.EndAt, StartAt: c.StartAt, EndAt: c.EndAt, TotalStock: c.TotalStock, ClaimedCount: c.ClaimedCount, Remaining: c.RemainingCount, RemainingCount: c.RemainingCount, PerUserLimit: c.PerUserLimit, RewardType: "cdk_list", Rules: c.Rules, Enabled: n.Status == model.StatusActive && s.effectiveCampaignStatusLocked(c) == model.StatusActive, Status: s.effectiveCampaignStatusLocked(c), ButtonText: defaultString(n.ButtonText, "立即领取"), ShowStock: n.ShowStock, ShowEndTime: n.ShowEndTime, RequireCaptcha: n.RequireCaptcha || c.RequireCaptchaDefault}
-	if fingerprint != "" {
-		if r := s.findExistingSuccessLocked(c.ID, n.ID, "", fingerprint, "", ""); r != nil {
-			info.UserClaimed = true
-			info.UserRewardContent = firstNonEmpty(r.Code, r.RewardContent)
-			info.UserClaimedAt = r.CreatedAt
-		}
+	if r := s.findExistingSuccessLocked(c.ID, n.ID, "", userID, fingerprint, "", ""); r != nil {
+		info.UserClaimed = true
+		info.UserRewardContent = firstNonEmpty(r.Code, r.RewardContent)
+		info.UserClaimedAt = r.CreatedAt
 	}
 	return info
 }
@@ -2376,7 +2434,7 @@ func (s *Store) evaluateRiskLocked(c *model.Campaign, n *model.DistributionNode,
 			}
 		case "device_limit":
 			if !c.AllowRepeat && fingerprint != "" {
-				if ex := s.findExistingSuccessLocked(c.ID, n.ID, "", fingerprint, "", ""); ex != nil {
+				if ex := s.findExistingSuccessLocked(c.ID, n.ID, "", "", fingerprint, "", ""); ex != nil {
 					return []string{r.ID}, nil
 				}
 			}
@@ -2410,7 +2468,8 @@ func (s *Store) recordFailedClaimLocked(c *model.Campaign, n *model.Distribution
 	_ = s.saveLocked()
 }
 
-func (s *Store) findExistingSuccessLocked(campaignID, nodeID, key, fingerprint, ip, ua string) *model.ClaimRecord {
+func (s *Store) findExistingSuccessLocked(campaignID, nodeID, key, userID, fingerprint, ip, ua string) *model.ClaimRecord {
+	var best *model.ClaimRecord
 	for _, r := range s.data.ClaimRecords {
 		if r.CampaignID != campaignID || r.Status != model.StatusSuccess {
 			continue
@@ -2418,17 +2477,24 @@ func (s *Store) findExistingSuccessLocked(campaignID, nodeID, key, fingerprint, 
 		if nodeID != "" && r.NodeID != "" && r.NodeID != nodeID {
 			continue
 		}
+		matched := false
 		if key != "" && r.IdempotencyKey == key {
-			return r
+			matched = true
 		}
-		if fingerprint != "" && r.Fingerprint == fingerprint {
-			return r
+		if !matched && userID != "" && r.UserID == userID {
+			matched = true
 		}
-		if fingerprint == "" && ip != "" && r.IP == ip && r.UserAgent == ua {
-			return r
+		if !matched && fingerprint != "" && r.Fingerprint == fingerprint {
+			matched = true
+		}
+		if !matched && fingerprint == "" && userID == "" && ip != "" && r.IP == ip && r.UserAgent == ua {
+			matched = true
+		}
+		if matched && (best == nil || r.CreatedAt > best.CreatedAt) {
+			best = r
 		}
 	}
-	return nil
+	return best
 }
 
 func (s *Store) findNodeBySlugLocked(slug string) *model.DistributionNode {

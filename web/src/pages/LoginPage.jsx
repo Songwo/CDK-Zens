@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { isLoggedIn, publicApi, communityApi } from "../lib/api";
+import { DEFAULT_BRAND, normalizeBrand, setAppTitle } from "../lib/brand";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -9,16 +10,21 @@ export default function LoginPage() {
 
   const [error, setError] = useState("");
   const [ssoLoading, setSsoLoading] = useState(false);
-  const [brand, setBrand] = useState({ systemName: "缪盒空投台", brandEnglishName: "MiuBox Airdrop Hub", logoText: "MB" });
+  const [brand, setBrand] = useState(DEFAULT_BRAND);
 
   useEffect(() => {
+    setAppTitle(DEFAULT_BRAND);
     // 如果已登录，直接跳转
     if (isLoggedIn()) {
       navigate(returnUrl, { replace: true });
       return;
     }
     publicApi.brand().then((data) => {
-      if (data?.systemName) setBrand(data);
+      if (data?.systemName) {
+        const next = normalizeBrand(data);
+        setBrand(next);
+        setAppTitle(next);
+      }
     }).catch(() => {});
   }, []);
 
