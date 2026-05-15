@@ -1188,6 +1188,69 @@ ul, ol { list-style: none; }
 .claim-brand h1 { font-size: 16px; font-weight: 700; color: var(--cp-ink); line-height: 1.2; }
 .claim-brand span { font-size: 11px; color: var(--cp-muted); letter-spacing: .5px; text-transform: uppercase; }
 
+/* 当前登录账号徽章 */
+.claim-userbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 999px;
+  background: var(--cp-surface-hover, rgba(255,255,255,0.04));
+  border: 1px solid var(--cp-divider, rgba(255,255,255,0.08));
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  max-width: 280px;
+}
+.claim-userbadge:hover { border-color: var(--cp-brand-glow, rgba(245,197,66,0.4)); }
+.claim-userbadge--guest { cursor: pointer; }
+.claim-userbadge--guest:hover { background: var(--cp-brand-glow, rgba(245,197,66,0.12)); transform: translateY(-1px); }
+.claim-userbadge--loading { opacity: .7; }
+
+.claim-userbadge__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cp-brand, #f5c542), #f59e0b);
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.claim-userbadge__avatar--guest {
+  background: var(--cp-divider, rgba(255,255,255,0.12));
+  color: var(--cp-muted, #94a3b8);
+}
+
+.claim-userbadge__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+.claim-userbadge__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cp-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.claim-userbadge__hint {
+  font-size: 11px;
+  color: var(--cp-muted);
+  letter-spacing: .3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
 .claim-content {
   flex: 1;
   width: 100%;

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { claimApi, isLoggedIn, publicApi } from "../lib/api";
+import { claimApi, isLoggedIn, publicApi, userApi, clearAuthToken } from "../lib/api";
 import { DEFAULT_BRAND, normalizeBrand, setAppTitle } from "../lib/brand";
 import { getFingerprint } from "../lib/storage";
 import ParticleBurst from "../components/ParticleBurst";
@@ -64,6 +64,51 @@ function InlineCDKReveal({ code, claimedAt }) {
   );
 }
 
+/* 当前登录账号徽章 */
+function CurrentUserBadge({ user, loggedIn }) {
+  if (!loggedIn) {
+    return (
+      <a
+        href={`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`}
+        className="claim-userbadge claim-userbadge--guest"
+        title="点击前往登录"
+      >
+        <span className="claim-userbadge__avatar claim-userbadge__avatar--guest">?</span>
+        <div className="claim-userbadge__meta">
+          <span className="claim-userbadge__label">未登录</span>
+          <span className="claim-userbadge__hint">点击使用社区账号登录</span>
+        </div>
+      </a>
+    );
+  }
+  if (!user) {
+    return (
+      <div className="claim-userbadge claim-userbadge--loading">
+        <span className="claim-userbadge__avatar claim-userbadge__avatar--guest">…</span>
+        <div className="claim-userbadge__meta">
+          <span className="claim-userbadge__label">正在校验身份…</span>
+        </div>
+      </div>
+    );
+  }
+  const display = user.nickname || user.username || user.email || "已登录用户";
+  const sub = user.username && user.username !== display ? `@${user.username}` : (user.email || (user.role === 'admin' ? '管理员' : '社区账号'));
+  const initial = (display || "?").trim().charAt(0).toUpperCase();
+  return (
+    <div className="claim-userbadge" title={`已登录：${display}`}>
+      {user.avatar ? (
+        <img src={user.avatar} alt={display} className="claim-userbadge__avatar" />
+      ) : (
+        <span className="claim-userbadge__avatar">{initial}</span>
+      )}
+      <div className="claim-userbadge__meta">
+        <span className="claim-userbadge__label">{display}</span>
+        <span className="claim-userbadge__hint">{sub}</span>
+      </div>
+    </div>
+  );
+}
+
 /* 倒计时组件 */
 function Countdown({ targetTime, onComplete }) {
   const [timeLeft, setTimeLeft] = useState(0);
@@ -118,9 +163,11 @@ export default function ClaimPage() {
   const [hcaptchaToken, setHcaptchaToken] = useState("");
   const [toast, setToast] = useState("");
   const [brand, setBrand] = useState(DEFAULT_BRAND);
+  const [currentUser, setCurrentUser] = useState(null);
   const hcaptchaRef = useRef(null);
   const fingerprint = getFingerprint();
-  const storageKey = `claim-result:${projectCode}`;
+  const userScope = currentUser?.userId || currentUser?.id || "guest";
+  const storageKey = useMemo(() => `claim-result:${userScope}:${projectCode}`, [userScope, projectCode]);
 
   useEffect(() => {
     setAppTitle(DEFAULT_BRAND);
@@ -133,10 +180,49 @@ export default function ClaimPage() {
     }).catch(() => {});
   }, []);
 
+  // 拉取当前登录用户信息（用于在领取页展示当前账号）
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      setCurrentUser(null);
+      return;
+    }
+    let cancelled = false;
+    userApi.getMe()
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.loggedIn === false) {
+          setCurrentUser(null);
+          clearAuthToken();
+          return;
+        }
+        setCurrentUser(data?.user || data || null);
+      })
+      .catch(() => { if (!cancelled) setCurrentUser(null); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // 切换账号或登出后，清理上一账号遗留在本地的领取缓存（避免串号）
+  useEffect(() => {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("claim-result:") && !key.startsWith(`claim-result:${userScope}:`)) {
+        // 历史的 `claim-result:<projectCode>` 旧格式也清掉
+        const parts = key.split(":");
+        if (parts.length === 2 || (parts.length === 3 && parts[1] !== userScope)) {
+          localStorage.removeItem(key);
+        }
+      }
+    });
+  }, [userScope]);
+
   const fetchProject = useCallback(async () => {
     try {
       const data = await claimApi.getNode(projectCode, fingerprint).catch(() => claimApi.getProject(projectCode, fingerprint));
       setProject(data);
+      // 后端在登录态下会返回 userInfo，作为兜底的当前用户信息源
+      if (data?.userInfo && !currentUser) {
+        setCurrentUser(data.userInfo);
+      }
+      // 后端按 userID 严格判定是否已领取；只要 userClaimed=true，刷新页面也只会显示既有兑换码
       if (data.userClaimed) {
         const normalized = {
           rewardContent: data.userRewardContent,
@@ -147,30 +233,15 @@ export default function ClaimPage() {
         localStorage.setItem(storageKey, JSON.stringify(normalized));
         return;
       }
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.claimToken) {
-          try {
-            const fresh = await claimApi.getResult(projectCode, parsed.claimToken);
-            const normalized = normalizeClaimResult(fresh);
-            setClaimResult(normalized);
-            localStorage.setItem(storageKey, JSON.stringify(normalized));
-          } catch {
-            localStorage.removeItem(storageKey);
-            setClaimResult(null);
-          }
-        } else {
-          localStorage.removeItem(storageKey);
-          setClaimResult(null);
-        }
-      }
+      // 未领取：清掉本地任何陈旧缓存，避免显示其他账号留下的兑换码
+      setClaimResult(null);
+      localStorage.removeItem(storageKey);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [projectCode, fingerprint, storageKey]);
+  }, [projectCode, fingerprint, storageKey, currentUser]);
 
   useEffect(() => { fetchProject(); }, [fetchProject]);
 
@@ -261,12 +332,15 @@ export default function ClaimPage() {
       <ParticleBurst trigger={burstTrigger} />
 
       {/* 顶部品牌标识 */}
-      <header className="claim-brand anim-fade-up">
-        <img src="/logo.png" alt="Logo" width="48" height="48" className="claim-brand__logo" style={{ objectFit: 'cover', background: 'transparent', boxShadow: 'none' }} />
-        <div>
-          <h1>{brand.systemName}</h1>
-          <span>{brand.brandEnglishName}</span>
+      <header className="claim-brand anim-fade-up" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <img src="/logo.png" alt="Logo" width="48" height="48" className="claim-brand__logo" style={{ objectFit: 'cover', background: 'transparent', boxShadow: 'none' }} />
+          <div>
+            <h1>{brand.systemName}</h1>
+            <span>{brand.brandEnglishName}</span>
+          </div>
         </div>
+        <CurrentUserBadge user={currentUser} loggedIn={isLoggedIn()} />
       </header>
 
       {/* 主内容区 — 全幅无卡片 */}
@@ -341,7 +415,12 @@ export default function ClaimPage() {
         <div className="claim-action anim-fade-up stagger-3" style={{padding: '24px 0 0', borderTop: '1px solid var(--cp-divider)', marginTop: '24px', flexShrink: 0}}>
           {claimResult ? (
             <div className="claim-result" style={{padding: 0, border: 'none', textAlign: 'center'}}>
-              <div className="claim-result__label" style={{fontSize: '16px', color: 'var(--cp-brand)', marginBottom: '24px'}}>领取成功 · CDK 已解锁</div>
+              <div className="claim-result__label" style={{fontSize: '16px', color: 'var(--cp-brand)', marginBottom: '12px'}}>领取成功 · CDK 已解锁</div>
+              {currentUser && (
+                <div style={{fontSize: '13px', color: 'var(--cp-muted)', marginBottom: '20px'}}>
+                  本兑换码已绑定至账号 <b style={{color: 'var(--cp-ink)'}}>{currentUser.nickname || currentUser.username}</b>，刷新页面不会重新发放新码。
+                </div>
+              )}
               <InlineCDKReveal code={claimResult.code || claimResult.rewardContent} claimedAt={claimResult.claimedAt} />
             </div>
           ) : (

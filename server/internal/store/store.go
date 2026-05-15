@@ -1479,6 +1479,12 @@ func (s *Store) ClaimNodeReward(slug, userID, fingerprint, ip, ua string, captch
 		return nil, model.ErrNotFound
 	}
 	nodeID := n.ID
+	// 优先使用 userID 做幂等判定。已登录用户在同一活动下只允许领取一次。
+	if userID != "" {
+		if existing := s.findUserClaimLocked(c.ID, nodeID, userID); existing != nil {
+			return claimResponseFromRecord(existing), nil
+		}
+	}
 	key := buildIdempotencyKey(c.ID, nodeID, fingerprint, ip, ua)
 	if existing := s.findExistingSuccessLocked(c.ID, nodeID, key, userID, fingerprint, ip, ua); existing != nil {
 		return claimResponseFromRecord(existing), nil
@@ -2352,12 +2358,56 @@ func (s *Store) claimViewLocked(r *model.ClaimRecord) map[string]interface{} {
 
 func (s *Store) claimInfoLocked(c *model.Campaign, n *model.DistributionNode, userID, fingerprint string) *model.ClaimPageInfo {
 	info := &model.ClaimPageInfo{NodeID: n.ID, NodeSlug: n.Slug, ProjectCode: n.Slug, Name: defaultString(n.Title, c.Name), Description: defaultString(n.Description, c.Description), StartTime: c.StartAt, EndTime: c.EndAt, StartAt: c.StartAt, EndAt: c.EndAt, TotalStock: c.TotalStock, ClaimedCount: c.ClaimedCount, Remaining: c.RemainingCount, RemainingCount: c.RemainingCount, PerUserLimit: c.PerUserLimit, RewardType: "cdk_list", Rules: c.Rules, Enabled: n.Status == model.StatusActive && s.effectiveCampaignStatusLocked(c) == model.StatusActive, Status: s.effectiveCampaignStatusLocked(c), ButtonText: defaultString(n.ButtonText, "立即领取"), ShowStock: n.ShowStock, ShowEndTime: n.ShowEndTime, RequireCaptcha: n.RequireCaptcha || c.RequireCaptchaDefault}
-	if r := s.findExistingSuccessLocked(c.ID, n.ID, "", userID, fingerprint, "", ""); r != nil {
+	// 当登录用户存在时，严格按 userID 查找已领取记录，避免相同浏览器/指纹下不同账号互相串数据
+	var existing *model.ClaimRecord
+	if userID != "" {
+		existing = s.findUserClaimLocked(c.ID, n.ID, userID)
+	} else {
+		existing = s.findExistingSuccessLocked(c.ID, n.ID, "", "", fingerprint, "", "")
+	}
+	if existing != nil {
 		info.UserClaimed = true
-		info.UserRewardContent = firstNonEmpty(r.Code, r.RewardContent)
-		info.UserClaimedAt = r.CreatedAt
+		info.UserRewardContent = firstNonEmpty(existing.Code, existing.RewardContent)
+		info.UserClaimedAt = existing.CreatedAt
+	}
+	if userID != "" {
+		if u := s.data.Users[userID]; u != nil {
+			info.UserInfo = &model.UserInfo{
+				UserID:          u.ID,
+				Username:        u.Username,
+				Role:            u.Role,
+				Avatar:          u.Avatar,
+				Nickname:        u.Nickname,
+				Email:           u.Email,
+				CommunityUserID: u.CommunityUserID,
+			}
+		}
 	}
 	return info
+}
+
+// findUserClaimLocked 严格按 userID + campaign(+node) 查找用户成功的领取记录，
+// 用于"是否已领取"的判定，不会被指纹/IP 命中其他用户的记录串号。
+func (s *Store) findUserClaimLocked(campaignID, nodeID, userID string) *model.ClaimRecord {
+	if userID == "" {
+		return nil
+	}
+	var best *model.ClaimRecord
+	for _, r := range s.data.ClaimRecords {
+		if r.Status != model.StatusSuccess || r.UserID != userID {
+			continue
+		}
+		if campaignID != "" && r.CampaignID != campaignID {
+			continue
+		}
+		if nodeID != "" && r.NodeID != "" && r.NodeID != nodeID {
+			continue
+		}
+		if best == nil || r.CreatedAt > best.CreatedAt {
+			best = r
+		}
+	}
+	return best
 }
 
 func (s *Store) effectiveCampaignStatusLocked(c *model.Campaign) string {
