@@ -940,8 +940,25 @@ func (s *Store) CreateCampaign(req model.CreateCampaignRequest, actor string) (m
 	c.EndTime = c.EndAt
 	s.data.Campaigns[c.ID] = c
 	s.data.Projects[projectID].CampaignIDs = appendUnique(s.data.Projects[projectID].CampaignIDs, c.ID)
-	for _, raw := range req.RewardList {
-		s.addCDKLocked(c.ID, raw, now)
+	if len(req.RewardList) > 0 {
+		// 一活动一池：创建期写入的 CDK 同样做全局去重，避免与其他活动撞码。
+		globalUsed := map[string]string{}
+		for _, cdk := range s.data.CDKs {
+			globalUsed[cdk.Code] = cdk.CampaignID
+		}
+		seen := map[string]bool{}
+		for _, raw := range req.RewardList {
+			code := strings.TrimSpace(raw)
+			if code == "" || seen[code] {
+				continue
+			}
+			if _, exists := globalUsed[code]; exists {
+				continue
+			}
+			seen[code] = true
+			s.addCDKLocked(c.ID, code, now)
+			globalUsed[code] = c.ID
+		}
 	}
 	s.recalcCampaignLocked(c)
 	s.logLocked("operation", "info", "创建活动", "创建活动 "+c.Name, actor, "", "campaign", c.ID, nil)
@@ -1147,12 +1164,15 @@ func (s *Store) ImportCDKsForProject(projectID, campaignID string, codes []strin
 	if projectID != "" && projectID != c.ProjectID {
 		return nil, model.NewAppError(http.StatusBadRequest, "PROJECT_CAMPAIGN_MISMATCH", "活动不属于所选项目")
 	}
+	// 一活动一 CDK 池：活动一旦有过 CDK，就不允许再次导入。
+	if s.campaignHasCDKLocked(campaignID) {
+		return nil, model.ErrCampaignCDKLocked
+	}
 	now := nowISO()
-	existing := map[string]bool{}
+	// 全局 code 索引，确保同一个 CDK 字符串不会出现在多个活动里。
+	globalUsed := map[string]string{}
 	for _, cdk := range s.data.CDKs {
-		if cdk.CampaignID == campaignID {
-			existing[cdk.Code] = true
-		}
+		globalUsed[cdk.Code] = cdk.CampaignID
 	}
 	seen := map[string]bool{}
 	resp := &model.ImportCDKResponse{}
@@ -1162,8 +1182,20 @@ func (s *Store) ImportCDKsForProject(projectID, campaignID string, codes []strin
 			resp.Invalid++
 			continue
 		}
-		if existing[code] || seen[code] {
+		if seen[code] {
 			resp.Duplicates++
+			continue
+		}
+		if owner, exists := globalUsed[code]; exists {
+			if owner == campaignID {
+				// 理论上不会到这里：上面已经拦了"活动已锁定"，但保险起见。
+				resp.Duplicates++
+			} else {
+				resp.UsedElsewhere++
+				if len(resp.RejectedSample) < 5 {
+					resp.RejectedSample = append(resp.RejectedSample, code)
+				}
+			}
 			continue
 		}
 		seen[code] = true
@@ -1173,11 +1205,22 @@ func (s *Store) ImportCDKsForProject(projectID, campaignID string, codes []strin
 			resp.Preview = append(resp.Preview, code)
 		}
 		s.addCDKLocked(campaignID, code, now)
+		globalUsed[code] = campaignID
 	}
-	resp.Failed = resp.Invalid
+	resp.Failed = resp.Invalid + resp.Duplicates + resp.UsedElsewhere
 	s.recalcCampaignLocked(c)
-	s.logLocked("operation", "info", "导入 CDK", fmt.Sprintf("活动 %s 导入 %d 条 CDK", c.Name, resp.Imported), actor, "", "campaign", campaignID, map[string]interface{}{"duplicates": resp.Duplicates, "invalid": resp.Invalid})
+	s.logLocked("operation", "info", "导入 CDK", fmt.Sprintf("活动 %s 导入 %d 条 CDK", c.Name, resp.Imported), actor, "", "campaign", campaignID, map[string]interface{}{"duplicates": resp.Duplicates, "invalid": resp.Invalid, "usedElsewhere": resp.UsedElsewhere})
 	return resp, s.saveLocked()
+}
+
+// campaignHasCDKLocked 判定活动是否已经存在 CDK（无论状态）。
+func (s *Store) campaignHasCDKLocked(campaignID string) bool {
+	for _, cdk := range s.data.CDKs {
+		if cdk.CampaignID == campaignID {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Store) SetCDKStatus(id, status, actor string) error {
@@ -2316,7 +2359,7 @@ func (s *Store) campaignViewLocked(c *model.Campaign) map[string]interface{} {
 	if p := s.data.Projects[c.ProjectID]; p != nil {
 		projectName = p.Name
 	}
-	return map[string]interface{}{"id": c.ID, "projectId": c.ProjectID, "projectName": projectName, "name": c.Name, "description": c.Description, "status": status, "totalStock": c.TotalStock, "claimedCount": c.ClaimedCount, "remainingCount": c.RemainingCount, "remaining": c.RemainingCount, "startAt": c.StartAt, "endAt": c.EndAt, "startTime": c.StartAt, "endTime": c.EndAt, "allowRepeat": c.AllowRepeat, "perUserLimit": c.PerUserLimit, "perIPLimit": c.PerIPLimit, "perDeviceLimit": c.PerDeviceLimit, "requireCaptchaDefault": c.RequireCaptchaDefault, "nodeIds": c.NodeIDs, "nodeCount": len(c.NodeIDs), "createdAt": c.CreatedAt, "updatedAt": c.UpdatedAt, "enabled": status == model.StatusActive, "projectCode": c.ProjectCode, "claimUrl": "/claim/" + c.ProjectCode, "rules": c.Rules}
+	return map[string]interface{}{"id": c.ID, "projectId": c.ProjectID, "projectName": projectName, "name": c.Name, "description": c.Description, "status": status, "totalStock": c.TotalStock, "claimedCount": c.ClaimedCount, "remainingCount": c.RemainingCount, "remaining": c.RemainingCount, "startAt": c.StartAt, "endAt": c.EndAt, "startTime": c.StartAt, "endTime": c.EndAt, "allowRepeat": c.AllowRepeat, "perUserLimit": c.PerUserLimit, "perIPLimit": c.PerIPLimit, "perDeviceLimit": c.PerDeviceLimit, "requireCaptchaDefault": c.RequireCaptchaDefault, "nodeIds": c.NodeIDs, "nodeCount": len(c.NodeIDs), "createdAt": c.CreatedAt, "updatedAt": c.UpdatedAt, "enabled": status == model.StatusActive, "projectCode": c.ProjectCode, "claimUrl": "/claim/" + c.ProjectCode, "rules": c.Rules, "cdkPoolLocked": c.TotalStock > 0}
 }
 
 func (s *Store) projectDetailLocked(p *model.Project) map[string]interface{} {

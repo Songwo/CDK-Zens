@@ -7,10 +7,20 @@ export default function LoginCallbackPage() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("processing"); // processing | success | error
   const [error, setError] = useState("");
+  const [returnTarget, setReturnTarget] = useState("/admin");
 
   useEffect(() => {
     const ssoToken = searchParams.get("sso_token");
     const errorParam = searchParams.get("error");
+
+    // 优先从 query 里取 returnUrl（如果 SSO 透传），否则回退到登录前保存的 sessionStorage。
+    let target = searchParams.get("returnUrl") || "";
+    if (!target) {
+      try { target = sessionStorage.getItem("sso_return_url") || ""; } catch { target = ""; }
+    }
+    // 只允许相对路径，避免开放重定向风险。
+    const safeTarget = target && target.startsWith("/") && !target.startsWith("//") ? target : "/admin";
+    setReturnTarget(safeTarget);
 
     if (errorParam) {
       setStatus("error");
@@ -30,10 +40,11 @@ export default function LoginCallbackPage() {
         const token = data.data?.token || data.token;
         if (!token) throw new Error("未返回有效的登录凭证");
         setAuthToken(token);
+        try { sessionStorage.removeItem("sso_return_url"); } catch { /* ignore */ }
         setStatus("success");
         // 短暂展示成功状态后跳转
         setTimeout(() => {
-          navigate("/admin", { replace: true });
+          navigate(safeTarget, { replace: true });
         }, 800);
       })
       .catch((err) => {
@@ -41,6 +52,8 @@ export default function LoginCallbackPage() {
         setError(err.message || "SSO 登录失败");
       });
   }, [searchParams, navigate]);
+
+  const isClaimReturn = returnTarget.startsWith("/claim/");
 
   return (
     <div className="login-layout">
@@ -64,7 +77,7 @@ export default function LoginCallbackPage() {
               登录成功！
             </h2>
             <p style={{ color: "var(--cp-muted)", fontSize: "14px", margin: 0 }}>
-              即将进入管理后台...
+              {isClaimReturn ? "即将返回领取页…" : "即将进入管理后台..."}
             </p>
           </>
         )}

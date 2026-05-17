@@ -40,6 +40,15 @@ export default function LoginPage() {
         throw new Error("社区 SSO 配置未就绪，请联系管理员");
       }
 
+      // 把原始 returnUrl 写入 sessionStorage，让 SSO 回调页登录成功后跳回原页（例如领取页）。
+      try {
+        if (returnUrl && returnUrl !== "/admin") {
+          sessionStorage.setItem("sso_return_url", returnUrl);
+        } else {
+          sessionStorage.removeItem("sso_return_url");
+        }
+      } catch { /* sessionStorage 可能被禁用，忽略 */ }
+
       const callbackUrl = `${window.location.origin}/login/callback`;
       const ssoUrl = `${communityUrl}/sso/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(callbackUrl)}`;
       window.location.href = ssoUrl;

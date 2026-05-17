@@ -112,7 +112,7 @@ export function CDKInventoryPage() {
   return (
     <div className="admin-page">
       {toast && <Toast {...toast} onClose={() => showToast(null)} />}
-      <PageHeader eyebrow="Inventory" title={mode === "import" ? "批量导入" : mode === "status" ? "状态管理" : mode === "export" ? "导出任务" : "库存总览"} description="管理全部 CDK 库存，支持导入、冻结、解冻、作废、删除和 CSV 导出。" actions={<div className="btn-group"><button className="btn btn--primary" onClick={() => setImportOpen(true)}>批量导入</button><button className="btn btn--secondary" onClick={() => run("export")}>导出 CSV</button></div>} />
+      <PageHeader eyebrow="Inventory" title={mode === "import" ? "批量导入" : mode === "status" ? "状态管理" : mode === "export" ? "导出任务" : "库存总览"} description="CDK 按「一活动一池」隔离，所有导入和管理操作必须先选定具体活动。" actions={<div className="btn-group"><button className="btn btn--primary" onClick={() => navigate("/admin/campaigns")}>前往活动管理</button><button className="btn btn--secondary" onClick={() => run("export")} disabled={!campaignId}>导出 CSV</button></div>} />
       <section className="stats-grid">
         <StatCard label="总量" value={fmt(stats.total)} />
         <StatCard label="未领取" value={fmt(stats.unused)} tone="success" />
@@ -121,23 +121,31 @@ export function CDKInventoryPage() {
       </section>
       <div className="toolbar panel-toolbar">
         <FilterSelect value={projectId} onChange={(v) => { setProjectId(v); setCampaignId(""); }}><option value="">全部项目</option>{projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</FilterSelect>
-        <FilterSelect value={campaignId} onChange={setCampaignId}><option value="">全部活动</option>{visibleCampaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</FilterSelect>
+        <FilterSelect value={campaignId} onChange={setCampaignId}><option value="">请选择活动</option>{visibleCampaigns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</FilterSelect>
         <FilterSelect value={status} onChange={setStatus}><option value="all">全部状态</option><option value="unused">未领取</option><option value="claimed">已领取</option><option value="frozen">已冻结</option><option value="invalid">已失效</option></FilterSelect>
-        <SearchInput value={keyword} onChange={setKeyword} placeholder="搜索 CDK / 活动" />
+        <SearchInput value={keyword} onChange={setKeyword} placeholder="搜索 CDK" />
         <button className="btn btn--secondary" disabled={!selected.length} onClick={() => setConfirm({ action: "batchFreeze" })}>批量冻结</button>
         <button className="btn btn--secondary" disabled={!selected.length} onClick={() => setConfirm({ action: "batchInvalid" })}>批量作废</button>
       </div>
-      <section className="panel">
-        <DataTable loading={loading} rows={rows} pageSize={12} columns={[
-          { key: "select", title: "选择", render: (r) => <input type="checkbox" checked={selected.includes(r.id)} onChange={(e) => setSelected((prev) => e.target.checked ? [...prev, r.id] : prev.filter((id) => id !== r.id))} /> },
-          { key: "projectName", title: "项目", render: (r) => r.projectName || "--" },
-          { key: "campaignName", title: "活动" },
-          { key: "code", title: "CDK", render: (r) => <code>{r.code}</code> },
-          { key: "status", title: "状态", render: (r) => <StatusBadge status={r.status} /> },
-          { key: "claimedAt", title: "领取时间", render: (r) => time(r.claimedAt) },
-          { key: "actions", title: "操作", render: (r) => <div className="row-actions"><CopyButton value={r.code}>复制</CopyButton>{r.status === "frozen" ? <button className="btn btn--text" onClick={() => run("unfreeze", r)}>解冻</button> : <button className="btn btn--text" onClick={() => setConfirm({ action: "freeze", row: r })}>冻结</button>}<button className="btn btn--text" onClick={() => setConfirm({ action: "invalidate", row: r })}>作废</button><button className="btn btn--text danger" onClick={() => setConfirm({ action: "delete", row: r })}>删除</button></div> },
-        ]} />
-      </section>
+      {!campaignId ? (
+        <EmptyState
+          title="请先选择一个活动查看其 CDK 库"
+          description="按「一活动一池」策略，CDK 严格归属于某个活动。请从上方筛选器选择活动，或前往活动管理页打开导入入口。"
+          action={<button className="btn btn--primary" onClick={() => navigate("/admin/campaigns")}>前往活动列表</button>}
+        />
+      ) : (
+        <section className="panel">
+          <DataTable loading={loading} rows={rows} pageSize={12} columns={[
+            { key: "select", title: "选择", render: (r) => <input type="checkbox" checked={selected.includes(r.id)} onChange={(e) => setSelected((prev) => e.target.checked ? [...prev, r.id] : prev.filter((id) => id !== r.id))} /> },
+            { key: "projectName", title: "项目", render: (r) => r.projectName || "--" },
+            { key: "campaignName", title: "活动" },
+            { key: "code", title: "CDK", render: (r) => <code>{r.code}</code> },
+            { key: "status", title: "状态", render: (r) => <StatusBadge status={r.status} /> },
+            { key: "claimedAt", title: "领取时间", render: (r) => time(r.claimedAt) },
+            { key: "actions", title: "操作", render: (r) => <div className="row-actions"><CopyButton value={r.code}>复制</CopyButton>{r.status === "frozen" ? <button className="btn btn--text" onClick={() => run("unfreeze", r)}>解冻</button> : <button className="btn btn--text" onClick={() => setConfirm({ action: "freeze", row: r })}>冻结</button>}<button className="btn btn--text" onClick={() => setConfirm({ action: "invalidate", row: r })}>作废</button><button className="btn btn--text danger" onClick={() => setConfirm({ action: "delete", row: r })}>删除</button></div> },
+          ]} />
+        </section>
+      )}
       {mode === "export" && (
         <section className="panel">
           <div className="panel__header"><div><h2>CDK 导出任务</h2><p>所有 CSV 导出会写入后端 ExportTask，并可再次下载。</p></div></div>
@@ -155,10 +163,21 @@ export function CDKInventoryPage() {
         campaigns={campaigns}
         initialProjectId={projectId}
         initialCampaignId={campaignId}
+        lockSelection={!!campaignId}
         onCancel={() => setImportOpen(false)}
         onCreateProject={() => navigate(`/admin/projects?open=create&returnTo=${encodeURIComponent("/admin/cdks/import")}`)}
         onSuccess={(res, campaign) => {
-          showToast(`成功导入 ${res.imported || res.successCount || 0} 个 CDK 到活动【${campaign?.name || "未知活动"}】`);
+          const imported = res.imported || res.successCount || 0;
+          const usedElsewhere = res.usedElsewhere || 0;
+          const dupes = res.duplicates || 0;
+          let msg = `成功导入 ${imported} 个 CDK 到活动【${campaign?.name || "未知活动"}】`;
+          if (usedElsewhere > 0 || dupes > 0) {
+            const parts = [];
+            if (usedElsewhere > 0) parts.push(`${usedElsewhere} 个被其他活动占用`);
+            if (dupes > 0) parts.push(`${dupes} 个本批重复`);
+            msg += `，跳过 ${parts.join("、")}`;
+          }
+          showToast(msg, usedElsewhere > 0 ? "error" : "success");
           setImportOpen(false);
           notifyOnboardingRefresh();
           const returnTo = new URLSearchParams(location.search).get("returnTo");

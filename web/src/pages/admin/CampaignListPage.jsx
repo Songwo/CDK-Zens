@@ -95,7 +95,17 @@ export default function CampaignListPage() {
 
   async function handleImported(res, campaign) {
     setImportTarget(null);
-    setToast({ message: `成功导入 ${res.imported || res.successCount || 0} 个 CDK 到活动【${campaign?.name || "未知活动"}】` });
+    const imported = res.imported || res.successCount || 0;
+    const usedElsewhere = res.usedElsewhere || 0;
+    const dupes = res.duplicates || 0;
+    let msg = `成功导入 ${imported} 个 CDK 到活动【${campaign?.name || "未知活动"}】`;
+    if (usedElsewhere > 0 || dupes > 0) {
+      const parts = [];
+      if (usedElsewhere > 0) parts.push(`${usedElsewhere} 个被其他活动占用`);
+      if (dupes > 0) parts.push(`${dupes} 个本批重复`);
+      msg += `，跳过 ${parts.join("、")}`;
+    }
+    setToast({ message: msg, type: usedElsewhere > 0 ? "error" : "success" });
     await reloadCampaigns();
     notifyOnboardingRefresh();
   }
@@ -168,7 +178,9 @@ export default function CampaignListPage() {
           { key: "time", title: "时间范围", render: (r) => <span>{formatTime(r.startTime)}<br /><small>{formatTime(r.endTime)}</small></span> },
           { key: "nodeCount", title: "绑定节点", render: (r) => r.nodeCount || 0 },
           { key: "actions", title: "操作", render: (r) => <div className="row-actions">
-            <button className="btn btn--text" onClick={() => setImportTarget(r)}>导入 CDK</button>
+            {(r.cdkPoolLocked || (r.totalStock || 0) > 0)
+              ? <button className="btn btn--text" onClick={() => navigate(`/admin/cdks?campaignId=${r.id}&projectId=${r.projectId || ""}`)}>查看 CDK</button>
+              : <button className="btn btn--text" onClick={() => setImportTarget(r)}>导入 CDK</button>}
             {r.enabled ? <button className="btn btn--text" onClick={() => setConfirm({ action: "pause", item: r })}>暂停</button> : <button className="btn btn--text" onClick={() => runAction("resume", r)}>恢复</button>}
             <button className="btn btn--text" onClick={() => setConfirm({ action: "end", item: r })}>结束</button>
             <button className="btn btn--text danger" onClick={() => setConfirm({ action: "delete", item: r })}>删除</button>
@@ -194,6 +206,7 @@ export default function CampaignListPage() {
         campaigns={campaigns}
         initialProjectId={importTarget?.projectId}
         initialCampaignId={importTarget?.id}
+        lockSelection
         onCancel={() => setImportTarget(null)}
         onCreateProject={() => navigate(`/admin/projects?open=create&returnTo=${encodeURIComponent("/admin/campaigns?open=create")}`)}
         onSuccess={handleImported}

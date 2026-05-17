@@ -420,12 +420,14 @@ type ImportCDKRequest struct {
 }
 
 type ImportCDKResponse struct {
-	Imported   int      `json:"imported"`
-	Success    int      `json:"successCount"`
-	Duplicates int      `json:"duplicates"`
-	Invalid    int      `json:"invalid"`
-	Failed     int      `json:"failedCount"`
-	Preview    []string `json:"preview"`
+	Imported       int      `json:"imported"`
+	Success        int      `json:"successCount"`
+	Duplicates     int      `json:"duplicates"`
+	UsedElsewhere  int      `json:"usedElsewhere"`
+	Invalid        int      `json:"invalid"`
+	Failed         int      `json:"failedCount"`
+	Preview        []string `json:"preview"`
+	RejectedSample []string `json:"rejectedSample,omitempty"`
 }
 
 type OnboardingStatus struct {
@@ -495,4 +497,6 @@ var (
 	ErrHCaptchaNotConfigured     = NewAppError(http.StatusInternalServerError, "HCAPTCHA_NOT_CONFIGURED", "验证码服务未配置")
 	ErrCaptchaInvalid            = NewAppError(http.StatusBadRequest, "CAPTCHA_INVALID", "人机验证失败，请刷新后重试")
 	ErrCaptchaServiceUnavailable = NewAppError(http.StatusServiceUnavailable, "CAPTCHA_SERVICE_UNAVAILABLE", "验证码服务暂时不可用，请稍后再试")
+	ErrCampaignCDKLocked         = NewAppError(http.StatusConflict, "CAMPAIGN_CDK_LOCKED", "该活动的 CDK 池已锁定，不允许重复导入")
+	ErrCDKCodeUsedElsewhere      = NewAppError(http.StatusConflict, "CDK_CODE_USED_ELSEWHERE", "该 CDK 已被其他活动占用")
 )
